@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userRepository = require('../models/userRepository');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sua-chave-secreta-muito-forte';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 async function validateCredentialsAndGenerateToken(email, password) {
     const user = await userRepository.findByEmail(email);
