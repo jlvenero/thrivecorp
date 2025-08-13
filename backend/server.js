@@ -30,9 +30,11 @@ testDbConnection();
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
+const companiesRoutes = require('./routes/companies');
 
 app.use('/api/auth', authRoutes);
 app.use('/api', profileRoutes)
+app.use('/api/companies', companiesRoutes);
 
 app.get('/', (req, res) => {
     res.send('API ThriveCorp está funcionando!');
