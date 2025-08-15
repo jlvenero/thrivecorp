@@ -106,6 +106,26 @@ async function deleteGym(id) {
     return result.affectedRows > 0;
 }
 
+async function approveGym(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+        'UPDATE gyms SET status = "active" WHERE id = ?',
+        [id]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+async function getProviderByUserId(userId) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT * FROM providers WHERE user_id = ?',
+        [userId]
+    );
+    connection.end();
+    return rows[0] || null;
+}
+
 module.exports = {
     createProvider,
     createGym,
@@ -116,5 +136,7 @@ module.exports = {
     getAllGyms,
     getGymById,
     updateGym,
-    deleteGym
+    deleteGym,
+    approveGym,
+    getProviderByUserId
 };

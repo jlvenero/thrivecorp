@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const JWT_SECRET = process.env.JWT_SECRET; // A mesma chave secreta usada para gerar o token
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Formato esperado: Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (token == null) {
         return res.status(401).json({ message: 'Token não fornecido.' });
@@ -15,8 +15,8 @@ function authenticateToken(req, res, next) {
         if (err) {
             return res.status(403).json({ message: 'Token inválido.' });
         }
-        req.user = user; // Adiciona os dados do usuário à requisição
-        next(); // Continua para a próxima função (a rota)
+        req.user = user;
+        next();
     });
 }
 

@@ -39,8 +39,19 @@ async function deleteCompany(id) {
     return result.affectedRows > 0;
 }
 
+async function approveCompany(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+        'UPDATE companies SET status = "active" WHERE id = ?',
+        [id]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
 module.exports = {
     createCompany,
     getCompanyById,
     deleteCompany,
+    approveCompany
 };

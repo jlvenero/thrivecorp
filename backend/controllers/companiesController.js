@@ -38,8 +38,23 @@ async function deleteCompany(req, res) {
     }
 }
 
+async function approveCompany(req, res) {
+    const { id } = req.params;
+    try {
+        const success = await companiesRepository.approveCompany(id);
+        if (success) {
+            res.status(200).json({ message: 'Empresa aprovada com sucesso!' });
+        } else {
+            res.status(404).json({ message: 'Empresa não encontrada para aprovação.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao aprovar a empresa.' });
+    }
+}
+
 module.exports = {
     createCompany,
     getCompany,
     deleteCompany,
+    approveCompany
 };
