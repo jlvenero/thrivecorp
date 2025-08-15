@@ -1,4 +1,3 @@
-// backend/models/providersRepository.js
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -9,7 +8,6 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-// Função para criar um novo prestador de serviço
 async function createProvider(providerData) {
     const connection = await mysql.createConnection(dbConfig);
     const { user_id, name, cnpj } = providerData;
@@ -21,13 +19,12 @@ async function createProvider(providerData) {
     return result.insertId;
 }
 
-// Função para cadastrar uma nova academia
 async function createGym(gymData) {
     const connection = await mysql.createConnection(dbConfig);
     const { provider_id, name, address } = gymData;
     const [result] = await connection.execute(
         'INSERT INTO gyms (provider_id, name, address, status) VALUES (?, ?, ?, ?)',
-        [provider_id, name, address, 'pending'] // O status inicial é 'pending'
+        [provider_id, name, address, 'pending']
     );
     connection.end();
     return result.insertId;
