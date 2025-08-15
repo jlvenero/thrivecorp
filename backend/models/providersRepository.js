@@ -1,0 +1,123 @@
+// backend/models/providersRepository.js
+const mysql = require('mysql2/promise');
+require('dotenv').config();
+
+const dbConfig = {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+};
+
+// Função para criar um novo prestador de serviço
+async function createProvider(providerData) {
+    const connection = await mysql.createConnection(dbConfig);
+    const { user_id, name, cnpj } = providerData;
+    const [result] = await connection.execute(
+        'INSERT INTO providers (user_id, name, cnpj) VALUES (?, ?, ?)',
+        [user_id, name, cnpj]
+    );
+    connection.end();
+    return result.insertId;
+}
+
+// Função para cadastrar uma nova academia
+async function createGym(gymData) {
+    const connection = await mysql.createConnection(dbConfig);
+    const { provider_id, name, address } = gymData;
+    const [result] = await connection.execute(
+        'INSERT INTO gyms (provider_id, name, address, status) VALUES (?, ?, ?, ?)',
+        [provider_id, name, address, 'pending'] // O status inicial é 'pending'
+    );
+    connection.end();
+    return result.insertId;
+}
+
+async function getAllProviders() {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute('SELECT * FROM providers');
+    connection.end();
+    return rows;
+}
+
+async function getProvidersById(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT * FROM providers WHERE id = ?',
+    [id]
+    );
+    connection.end();
+    return rows[0] || null;
+}
+
+async function updateProvider(id, providerData) {
+    const connection = await mysql.createConnection(dbConfig);
+    const { name, cnpj } = providerData;
+    const [result] = await connection.execute(
+        'UPDATE providers SET name = ?, cnpj = ? WHERE id = ?',
+        [name, cnpj, id]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+async function deleteProvider(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+        'DELETE FROM providers WHERE id = ?',
+        [id]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+async function getAllGyms() {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute('SELECT * FROM gyms');
+    connection.end();
+    return rows;
+}
+
+async function getGymById(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT * FROM gyms WHERE id = ?',
+        [id]
+    );
+    connection.end();
+    return rows[0] || null;
+}
+
+async function updateGym(id, gymData) {
+    const connection = await mysql.createConnection(dbConfig);
+    const { name, address, status } = gymData;
+    const [result] = await connection.execute(
+        'UPDATE gyms SET name = ?, address = ?, status = ? WHERE id = ?',
+        [name, address, status, id]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+async function deleteGym(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+        'DELETE FROM gyms WHERE id = ?',
+        [id]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+module.exports = {
+    createProvider,
+    createGym,
+    getAllProviders,
+    getProvidersById,
+    updateProvider,
+    deleteProvider,
+    getAllGyms,
+    getGymById,
+    updateGym,
+    deleteGym
+};
