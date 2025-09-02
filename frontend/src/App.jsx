@@ -2,13 +2,12 @@ import React from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoginPage from './pages/loginPage';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import PrivateRoute from './routes/PrivateRoute';
 
 function App() {
-    // A constante navigate pode ser usada agora
     const navigate = useNavigate();
 
-    // Função de logout que remove os dados do localStorage
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userRole');
@@ -22,6 +21,8 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route element={<PrivateRoute />}>
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
+                    {/* Rota para o painel de aprovação */}
+                    <Route path="/admin" element={<AdminDashboard />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
