@@ -10,6 +10,15 @@ async function createCompany(req, res) {
     }
 }
 
+async function getAllCompanies(req, res){
+    try{
+        const companies = await companiesRepository.getAllCompanies();
+        res.status(200).json(companies);
+    } catch (error) {
+        res.status(500).json({ error : 'Erro ao buscar a lista de empresas.' });
+    }
+}
+
 async function getCompany(req, res) {
     const { id } = req.params;
     try {
@@ -54,6 +63,7 @@ async function approveCompany(req, res) {
 
 module.exports = {
     createCompany,
+    getAllCompanies,
     getCompany,
     deleteCompany,
     approveCompany

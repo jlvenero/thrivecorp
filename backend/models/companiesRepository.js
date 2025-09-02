@@ -19,6 +19,13 @@ async function createCompany(companyData) {
     return result.insertId;
 }
 
+async function getAllCompanies(){
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute('SELECT * FROM companies');
+    connection.end();
+    return rows;
+}
+
 async function getCompanyById(id) {
     const connection = await mysql.createConnection(dbConfig);
     const [rows] = await connection.execute(
@@ -52,6 +59,7 @@ async function approveCompany(id) {
 module.exports = {
     createCompany,
     getCompanyById,
+    getAllCompanies,
     deleteCompany,
     approveCompany
 };
