@@ -10,12 +10,14 @@ async function createCompany(req, res) {
     }
 }
 
-async function getAllCompanies(req, res){
-    try{
+async function getAllCompanies(req, res) {
+    console.log('Requisição chegou no controlador getAllCompanies!');
+    try {
         const companies = await companiesRepository.getAllCompanies();
         res.status(200).json(companies);
     } catch (error) {
-        res.status(500).json({ error : 'Erro ao buscar a lista de empresas.' });
+        console.error("Erro ao buscar empresas:", error);
+        res.status(500).json({ error: 'Erro ao buscar a lista de empresas.' });
     }
 }
 

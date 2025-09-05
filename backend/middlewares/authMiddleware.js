@@ -11,13 +11,14 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ message: 'Token não fornecido.' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token inválido.' });
-        }
+    try {
+        const user = jwt.verify(token, JWT_SECRET);
         req.user = user;
         next();
-    });
+    } catch (err) {
+        console.error('Erro de autenticação:', err);
+        return res.status(403).json({ message: 'Token inválido ou expirado.' });
+    }
 }
 
 module.exports = authenticateToken;

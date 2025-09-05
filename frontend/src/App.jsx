@@ -3,11 +3,12 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoginPage from './pages/loginPage';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminAprovarEmpresas from './pages/AdminAprovarEmpresas';
+import AdminAprovarAcademias from './pages/AdminAprovarAcademias';
 import PrivateRoute from './routes/PrivateRoute';
 
 function App() {
     const navigate = useNavigate();
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userRole');
@@ -16,13 +17,13 @@ function App() {
 
     return (
         <div className="App">
-            {/* Você pode passar a função de logout para outros componentes aqui */}
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route element={<PrivateRoute />}>
+                    {/* Apenas uma rota protegida para o dashboard */}
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
-                    {/* Rota para o painel de aprovação */}
-                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/empresas" element={<AdminAprovarEmpresas />} />
+                    <Route path="/admin/academias" element={<AdminAprovarAcademias />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
