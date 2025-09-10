@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAprovarEmpresas from './pages/AdminAprovarEmpresas';
 import AdminAprovarAcademias from './pages/AdminAprovarAcademias';
+import ProviderDashboard from './pages/ProviderDashboard';
 import PrivateRoute from './routes/PrivateRoute';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
                     <Route path="/admin/empresas" element={<AdminAprovarEmpresas />} />
                     <Route path="/admin/academias" element={<AdminAprovarAcademias />} />
+                    <Route path="/prestador/academias" element={<ProviderDashboard />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/index.jsx';
 import AdminAprovarEmpresas from './AdminAprovarEmpresas.jsx';
 import AdminAprovarAcademias from './AdminAprovarAcademias.jsx';
+import ProviderDashboard from './ProviderDashboard'; 
 
 const Dashboard = ({ onLogout }) => {
     const [userRole, setUserRole] = useState(null);
@@ -23,7 +24,10 @@ const Dashboard = ({ onLogout }) => {
             }
             return <div>Bem-vindo, Administrador! Use o menu lateral para gerenciar a plataforma.</div>;
         } else if (userRole === 'provider') {
-            // ... lógica para o provider ...
+            if (location.pathname === '/prestador/academias') {
+                return <ProviderDashboard />;
+            }
+            return<div>Bem-vindo, Prestador! Use o menu lateral para gerenciar suas academias.</div>;
         } else if (userRole === 'company_admin') {
             // ... lógica para o company_admin ...
         } else {
