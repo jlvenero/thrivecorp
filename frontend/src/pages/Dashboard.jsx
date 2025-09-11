@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/index.jsx';
-import AdminAprovarEmpresas from './AdminAprovarEmpresas.jsx';
-import AdminAprovarAcademias from './AdminAprovarAcademias.jsx';
-import ProviderDashboard from './ProviderDashboard'; 
+import AdminAprovarEmpresas from './AdminAprovarEmpresas';
+import AdminAprovarAcademias from './AdminAprovarAcademias';
+import ProviderDashboard from './ProviderDashboard';
+import CompanyAdminDashboard from './CompanyAdminDashboard';
+import ColaboradorDashboard from './ColaboradorDashboard';
 
 const Dashboard = ({ onLogout }) => {
     const [userRole, setUserRole] = useState(null);
@@ -27,11 +29,14 @@ const Dashboard = ({ onLogout }) => {
             if (location.pathname === '/prestador/academias') {
                 return <ProviderDashboard />;
             }
-            return<div>Bem-vindo, Prestador! Use o menu lateral para gerenciar suas academias.</div>;
+            return <div>Bem-vindo, Prestador! Use o menu lateral para gerenciar suas academias.</div>;
         } else if (userRole === 'company_admin') {
-            // ... lógica para o company_admin ...
+            if (location.pathname === '/empresa/colaboradores') {
+                return <CompanyAdminDashboard />;
+            }
+            return <div>Bem-vindo, Administrador da Empresa! Use o menu lateral para gerenciar.</div>;
         } else {
-            // ... lógica para o colaborador padrão ...
+            return <ColaboradorDashboard />;
         }
     };
 

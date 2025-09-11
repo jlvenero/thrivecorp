@@ -11,7 +11,10 @@ const CompanyAdminDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/company/collaborators', {
+            const userRole = localStorage.getItem('userRole');
+            const companyId = 3;
+            
+            const response = await axios.get(`http://localhost:3000/api/company/${companyId}/collaborators`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -39,7 +42,7 @@ const CompanyAdminDashboard = () => {
                 <ul>
                     {collaborators.map(collaborator => (
                         <li key={collaborator.id}>
-                            {collaborator.name} (Status: {collaborator.status})
+                            {collaborator.first_name} {collaborator.last_name} ({collaborator.email}) - Status: {collaborator.status}
                         </li>
                     ))}
                 </ul>

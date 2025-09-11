@@ -7,6 +7,7 @@ import AdminAprovarEmpresas from './pages/AdminAprovarEmpresas';
 import AdminAprovarAcademias from './pages/AdminAprovarAcademias';
 import ProviderDashboard from './pages/ProviderDashboard';
 import PrivateRoute from './routes/PrivateRoute';
+import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 
 function App() {
     const navigate = useNavigate();
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/admin/empresas" element={<AdminAprovarEmpresas />} />
                     <Route path="/admin/academias" element={<AdminAprovarAcademias />} />
                     <Route path="/prestador/academias" element={<ProviderDashboard />} />
+                     <Route path="/empresa/colaboradores" element={<CompanyAdminDashboard />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
