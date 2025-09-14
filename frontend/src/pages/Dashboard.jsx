@@ -18,13 +18,11 @@ const Dashboard = ({ onLogout }) => {
 
     const renderContent = () => {
         if (userRole === 'thrive_admin') {
-            if (location.pathname === '/admin/empresas') {
-                return <AdminAprovarEmpresas />;
-            }
-            if (location.pathname === '/admin/academias') {
-                return <AdminAprovarAcademias />;
-            }
-            return <div>Bem-vindo, Administrador! Use o menu lateral para gerenciar a plataforma.</div>;
+        if (location.pathname === '/admin/academias') {
+            return <AdminAprovarAcademias />;
+        }
+        // Se a role é 'thrive_admin', renderiza o painel de aprovação de empresas por padrão
+        return <AdminAprovarEmpresas />;
         } else if (userRole === 'provider') {
             if (location.pathname === '/prestador/academias') {
                 return <ProviderDashboard />;

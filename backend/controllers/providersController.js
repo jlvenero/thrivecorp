@@ -72,6 +72,17 @@ async function deleteProvider(req, res) {
     }
 }
 
+async function listProviderGyms(req, res) {
+    console.log('Controlador listProviderGyms: req.provider.id recebido:', req.provider.id);
+    try {
+        const gyms = await providersRepository.getGymsByProviderId(req.provider.id);
+        res.json(gyms);
+    } catch (error) {
+        console.error('Erro ao listar academias do prestador:', error);
+        res.status(500).json({ error: 'Erro ao listar academias.' });
+    }
+}
+
 async function listGyms(req, res) {
     try {
         const gyms = await providersRepository.getAllGyms();
@@ -145,6 +156,7 @@ module.exports = {
     getProvider,
     updateProvider,
     deleteProvider,
+    listProviderGyms,
     listGyms,
     getGym,
     updateGym,

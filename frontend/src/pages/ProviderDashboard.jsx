@@ -11,14 +11,14 @@ const ProviderDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/gyms', {
+            const response = await axios.get('http://localhost:3000/api/providers/gyms', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             setGyms(response.data);
         } catch (err) {
-            setError('Falha ao buscar as academias.');
+            setError('Falha ao buscar suas academias.');
             console.error(err);
         } finally {
             setLoading(false);

@@ -37,11 +37,10 @@ async function getAllProviders() {
     return rows;
 }
 
-async function getProvidersById(id) {
+async function getProviderById(id) {
     const connection = await mysql.createConnection(dbConfig);
     const [rows] = await connection.execute(
-        'SELECT * FROM providers WHERE id = ?',
-    [id]
+        'SELECT * FROM providers WHERE id = ?', [id]
     );
     connection.end();
     return rows[0] || null;
@@ -66,6 +65,16 @@ async function deleteProvider(id) {
     );
     connection.end();
     return result.affectedRows > 0;
+}
+
+async function getGymsByProviderId(providerId) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT * FROM gyms WHERE provider_id = ?',
+        [providerId]
+    );
+    connection.end();
+    return rows;
 }
 
 async function getAllGyms() {
@@ -117,12 +126,14 @@ async function approveGym(id) {
 }
 
 async function getProviderByUserId(userId) {
+    console.log('Repositório: Buscando prestador para userId:', userId);
     const connection = await mysql.createConnection(dbConfig);
     const [rows] = await connection.execute(
         'SELECT * FROM providers WHERE user_id = ?',
         [userId]
     );
     connection.end();
+    // Retorne o primeiro resultado ou null se a lista estiver vazia
     return rows[0] || null;
 }
 
@@ -130,9 +141,10 @@ module.exports = {
     createProvider,
     createGym,
     getAllProviders,
-    getProvidersById,
+    getProviderById,
     updateProvider,
     deleteProvider,
+    getGymsByProviderId,
     getAllGyms,
     getGymById,
     updateGym,
