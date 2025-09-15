@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const dbConfig = {
@@ -7,6 +8,39 @@ const dbConfig = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
 };
+
+// Função para criar um novo usuário e associá-lo como colaborador a uma empresa
+async function addCollaborator(collaboratorData, companyId) {
+    const connection = await mysql.createConnection(dbConfig);
+    const { first_name, last_name, email, password } = collaboratorData;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const role = 'collaborator';
+
+    await connection.beginTransaction();
+
+    try {
+        // 1. Cria o usuário na tabela `users`
+        const [userResult] = await connection.execute(
+            'INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)',
+            [first_name, last_name, email, hashedPassword, role]
+        );
+        const newUserId = userResult.insertId;
+
+        // 2. Cria o registro do colaborador na tabela `collaborators`
+        await connection.execute(
+            'INSERT INTO collaborators (user_id, company_id, status) VALUES (?, ?, ?)',
+            [newUserId, companyId, 'active']
+        );
+
+        await connection.commit();
+        return newUserId;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.end();
+    }
+}
 
 async function getCollaboratorsByCompanyId(companyId) {
     const connection = await mysql.createConnection(dbConfig);
@@ -24,4 +58,5 @@ async function getCollaboratorsByCompanyId(companyId) {
 
 module.exports = {
     getCollaboratorsByCompanyId,
+    addCollaborator
 };

@@ -20,6 +20,7 @@ function checkCompanyAdminPermission(req, res, next) {
 }
 
 // Rota para listar os colaboradores de uma empresa
+router.post('/:companyId/collaborators', authenticateToken, checkCompanyAdminPermission, collaboratorsController.addCollaborator);
 router.get('/:companyId/collaborators', authenticateToken, checkCompanyAdminPermission, collaboratorsController.getCollaborators);
 
 module.exports = router;
