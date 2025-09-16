@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './ColaboradorDashboard.css';
 
 const ColaboradorDashboard = () => {
     const [gyms, setGyms] = useState([]);
@@ -11,7 +12,7 @@ const ColaboradorDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/gyms', {
+            const response = await axios.get('http://localhost:3000/api/collaborator/gyms', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -30,21 +31,22 @@ const ColaboradorDashboard = () => {
     }, []);
 
     if (loading) return <p>Carregando academias...</p>;
-    if (error) return <p style={{ color: 'red' }}>{error}</p>;
+    if (error) return <p className="error-message">{error}</p>;
 
     return (
-        <div>
+        <div className="colaborador-dashboard-container">
             <h3>Academias Disponíveis</h3>
             {gyms.length > 0 ? (
                 <ul>
                     {gyms.map(gym => (
                         <li key={gym.id}>
-                            {gym.name} (Endereço: {gym.address}) - Status: **{gym.status}**
+                            <span className="gym-name">{gym.name}</span>
+                            <span className="gym-address">{gym.address}</span>
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p>Nenhuma academia encontrada.</p>
+                <p>Nenhuma academia disponível no momento.</p>
             )}
         </div>
     );

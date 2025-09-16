@@ -5,7 +5,7 @@ import AdminAprovarEmpresas from './AdminAprovarEmpresas/index.jsx';
 import AdminAprovarAcademias from './AdminAprovarAcademias/index.jsx';
 import ProviderDashboard from './ProviderDashboard';
 import CompanyAdminDashboard from './CompanyAdminDashboard';
-import ColaboradorDashboard from './ColaboradorDashboard';
+import ColaboradorDashboard from './ColaboradorDashboard/index.jsx';
 
 const Dashboard = ({ onLogout }) => {
     const [userRole, setUserRole] = useState(null);

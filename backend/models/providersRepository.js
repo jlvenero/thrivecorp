@@ -79,7 +79,7 @@ async function getGymsByProviderId(providerId) {
 
 async function getAllGyms() {
     const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT * FROM gyms');
+    const [rows] = await connection.execute("SELECT * FROM gyms WHERE status = 'active'");
     connection.end();
     return rows;
 }

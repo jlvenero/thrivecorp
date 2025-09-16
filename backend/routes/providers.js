@@ -41,4 +41,7 @@ router.delete('/gyms/:id', authenticateToken, checkGymDeletePermission, provider
 router.put('/gyms/:id/approve', authenticateToken, authorize('thrive_admin'), providersController.approveGym);
 router.delete('/gyms/:id/reprove', authenticateToken, authorize('thrive_admin'), providersController.reproveGym);
 
+router.get('/collaborator/gyms', authenticateToken, providersController.listGyms);
+router.get('/gyms', authenticateToken, getProviderDetails, providersController.listProviderGyms);
+
 module.exports = router;
