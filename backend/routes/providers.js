@@ -1,4 +1,3 @@
-// backend/routes/providers.js
 const express = require('express');
 const router = express.Router();
 const providersController = require('../controllers/providersController');
@@ -7,7 +6,6 @@ const authorize = require('../middlewares/authorizationMiddleware');
 const checkGymDeletePermission = require('../middlewares/permissionMiddleware');
 const providersRepository = require('../models/providersRepository');
 
-// Middleware para encontrar o ID do prestador a partir do user_id do token
 async function getProviderDetails(req, res, next) {
     try {
         console.log('Middleware getProviderDetails: user_id do token:', req.user.userId);
@@ -31,7 +29,7 @@ router.get('/providers/:id', authenticateToken, providersController.getProvider)
 router.put('/providers/:id', authenticateToken, providersController.updateProvider);
 router.delete('/providers/:id', authenticateToken, providersController.deleteProvider);
 
-router.get('/gyms/all', authenticateToken, authorize('thrive_admin'), providersController.listGyms);
+router.get('/gyms/all', authenticateToken, authorize('thrive_admin'), providersController.listAllGymsForAdmin);
 
 router.post('/gyms', authenticateToken, providersController.registerGym);
 router.get('/gyms', authenticateToken, getProviderDetails, providersController.listProviderGyms);
@@ -41,6 +39,7 @@ router.delete('/gyms/:id', authenticateToken, checkGymDeletePermission, provider
 router.put('/gyms/:id/approve', authenticateToken, authorize('thrive_admin'), providersController.approveGym);
 router.delete('/gyms/:id/reprove', authenticateToken, authorize('thrive_admin'), providersController.reproveGym);
 
+router.post('/provider/gyms', authenticateToken, getProviderDetails, providersController.addOwnGym);
 router.get('/collaborator/gyms', authenticateToken, providersController.listGyms);
 router.get('/gyms', authenticateToken, getProviderDetails, providersController.listProviderGyms);
 

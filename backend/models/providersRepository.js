@@ -84,6 +84,13 @@ async function getAllGyms() {
     return rows;
 }
 
+async function getAllGymsForAdmin() {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute('SELECT * FROM gyms');
+    connection.end();
+    return rows;
+}
+
 async function getGymById(id) {
     const connection = await mysql.createConnection(dbConfig);
     const [rows] = await connection.execute(
@@ -120,34 +127,39 @@ async function reproveGymAndDeactivateProvider(gymId) {
     await connection.beginTransaction();
 
     try {
-        // Passo 1: Encontrar o provider_id a partir do gymId
         const [gyms] = await connection.execute('SELECT provider_id FROM gyms WHERE id = ?', [gymId]);
         if (gyms.length === 0) {
-            throw new Error('Academia não encontrada.');
+            throw new Error('Academia a ser reprovada não encontrada.');
         }
         const providerId = gyms[0].provider_id;
 
-        // Passo 2: Encontrar o user_id a partir do providerId
-        const [providers] = await connection.execute('SELECT user_id FROM providers WHERE id = ?', [providerId]);
-        if (providers.length === 0) {
-            throw new Error('Prestador de serviço não encontrado.');
+        const [deleteResult] = await connection.execute('DELETE FROM gyms WHERE id = ?', [gymId]);
+        if (deleteResult.affectedRows === 0) {
+            throw new Error('Falha ao deletar a academia especificada.');
         }
-        const userId = providers[0].user_id;
 
-        // Passo 3: Deletar a academia (gym)
-        await connection.execute('DELETE FROM gyms WHERE id = ?', [gymId]);
+        const [remainingGyms] = await connection.execute(
+            'SELECT COUNT(*) as count FROM gyms WHERE provider_id = ?',
+            [providerId]
+        );
+        const gymCount = remainingGyms[0].count;
 
-        // Passo 4: Deletar o prestador (provider)
-        await connection.execute('DELETE FROM providers WHERE id = ?', [providerId]);
+        if (gymCount === 0) {
+            const [providers] = await connection.execute('SELECT user_id FROM providers WHERE id = ?', [providerId]);
+            if (providers.length > 0) {
+                const userId = providers[0].user_id;
 
-        // Passo 5: Desativar o usuário (user)
-        await connection.execute('UPDATE users SET status = "inactive" WHERE id = ?', [userId]);
+                await connection.execute('DELETE FROM providers WHERE id = ?', [providerId]);
+
+                await connection.execute('UPDATE users SET status = "inactive" WHERE id = ?', [userId]);
+            }
+        }
 
         await connection.commit();
         return true;
     } catch (error) {
         await connection.rollback();
-        console.error("Erro na transação de reprovação:", error); // Adiciona um log de erro detalhado
+        console.error("Erro na transação de reprovação:", error);
         throw error;
     } finally {
         connection.end();
@@ -159,15 +171,12 @@ async function approveGym(id) {
     await connection.beginTransaction();
 
     try {
-        // 1. Atualiza o status da academia para 'active'
         const [updateGymResult] = await connection.execute(
             'UPDATE gyms SET status = "active" WHERE id = ?',
             [id]
         );
 
-        // Se a academia foi atualizada, encontre o usuário associado para ativá-lo
         if (updateGymResult.affectedRows > 0) {
-            // 2. Encontre a academia para obter o provider_id
             const [gyms] = await connection.execute(
                 'SELECT provider_id FROM gyms WHERE id = ?',
                 [id]
@@ -176,7 +185,6 @@ async function approveGym(id) {
             if (gyms.length > 0) {
                 const providerId = gyms[0].provider_id;
                 
-                // 3. Encontre o prestador para obter o user_id
                 const [providers] = await connection.execute(
                     'SELECT user_id FROM providers WHERE id = ?',
                     [providerId]
@@ -185,7 +193,6 @@ async function approveGym(id) {
                 if (providers.length > 0) {
                     const userId = providers[0].user_id;
 
-                    // 4. Atualize o status do usuário para 'active'
                     await connection.execute(
                         'UPDATE users SET status = "active" WHERE id = ?',
                         [userId]
@@ -199,7 +206,7 @@ async function approveGym(id) {
 
     } catch (error) {
         await connection.rollback();
-        throw error; // Lança o erro para ser tratado no controller
+        throw error;
     } finally {
         connection.end();
     }
@@ -213,7 +220,6 @@ async function getProviderByUserId(userId) {
         [userId]
     );
     connection.end();
-    // Retorne o primeiro resultado ou null se a lista estiver vazia
     return rows[0] || null;
 }
 
@@ -232,4 +238,5 @@ module.exports = {
     deleteGym,
     approveGym,
     getProviderByUserId,
+    getAllGymsForAdmin
 };

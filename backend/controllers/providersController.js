@@ -29,6 +29,15 @@ async function listProviders(req, res) {
     }
 }
 
+async function listAllGymsForAdmin(req, res) {
+    try {
+        const gyms = await providersRepository.getAllGymsForAdmin();
+        res.json(gyms);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao listar academias para o admin.' });
+    }
+}
+
 async function getProvider(req, res) {
     const { id } = req.params;
     try {
@@ -152,7 +161,6 @@ async function approveGym(req, res) {
 async function reproveGym(req, res) {
     const { id } = req.params;
     try {
-        // Chame a nova função específica para reprovação
         const success = await providersRepository.reproveGymAndDeactivateProvider(id);
         if (success) {
             res.status(200).json({ message: 'Academia reprovada e usuário desativado com sucesso.' });
@@ -161,6 +169,19 @@ async function reproveGym(req, res) {
         }
     } catch (error) {
         res.status(500).json({ error: 'Erro ao reprovar a academia.' });
+    }
+}
+
+async function addOwnGym(req, res) {
+    const providerId = req.provider.id;
+    const { name, address } = req.body;
+
+    try {
+        const newGymId = await providersRepository.createGym({ provider_id: providerId, name, address });
+        res.status(201).json({ message: 'Nova academia cadastrada com sucesso e aguardando aprovação.', id: newGymId });
+    } catch (error) {
+        console.error('Erro ao cadastrar nova academia:', error);
+        res.status(500).json({ error: 'Erro ao cadastrar a nova academia.' });
     }
 }
 
@@ -177,5 +198,7 @@ module.exports = {
     updateGym,
     deleteGym,
     approveGym,
-    reproveGym
+    reproveGym,
+    addOwnGym,
+    listAllGymsForAdmin
 };

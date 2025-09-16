@@ -1,0 +1,72 @@
+.provider-dashboard-container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.provider-dashboard-container h3 {
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.form-container {
+    margin-bottom: 30px;
+}
+
+.form-container form input {
+    display: block;
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-container form button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.provider-dashboard-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.provider-dashboard-container li {
+    display: grid;
+    grid-template-columns: 2fr 3fr 1fr;
+    gap: 15px;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.gym-name {
+    font-weight: bold;
+}
+
+.gym-status {
+    font-weight: bold;
+    text-align: right;
+}
+
+.gym-status.pending {
+    color: #ff9800;
+}
+
+.gym-status.active {
+    color: #4caf50;
+}
+
+.error-message {
+    color: #f44336;
+}
