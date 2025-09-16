@@ -11,10 +11,55 @@
 }
 
 .company-admin-dashboard-container li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px;
     border-bottom: 1px solid #eee;
 }
 
 .error-message {
     color: red;
+}
+
+/* Estilos para o formulário */
+.company-admin-dashboard-container form {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.company-admin-dashboard-container form input {
+    display: block;
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.company-admin-dashboard-container form button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Estilo para o botão de desativar */
+.deactivate-btn {
+    padding: 5px 10px;
+    background-color: #f44336; /* Vermelho */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.deactivate-btn:hover {
+    background-color: #d32f2f;
 }

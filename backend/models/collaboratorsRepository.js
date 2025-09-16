@@ -19,10 +19,10 @@ async function addCollaborator(collaboratorData, companyId) {
     await connection.beginTransaction();
 
     try {
-        // 1. Cria o usuário na tabela `users`
+        // 1. Cria o usuário na tabela `users` JÁ COM O STATUS 'active'
         const [userResult] = await connection.execute(
-            'INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)',
-            [first_name, last_name, email, hashedPassword, role]
+            'INSERT INTO users (first_name, last_name, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [first_name, last_name, email, hashedPassword, role, 'active'] // CORREÇÃO: Status definido como 'active'
         );
         const newUserId = userResult.insertId;
 
@@ -44,19 +44,65 @@ async function addCollaborator(collaboratorData, companyId) {
 
 async function getCollaboratorsByCompanyId(companyId) {
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Executando query para companyId:', companyId); // Log para ver o ID na query
     const [rows] = await connection.execute(
-        `SELECT c.id, u.email, u.first_name, u.last_name, c.status
+        `SELECT c.id, u.email, u.first_name, u.last_name, u.status
          FROM collaborators AS c
          JOIN users AS u ON c.user_id = u.id
-         WHERE c.company_id = ?`,
+         WHERE c.company_id = ? AND u.status = 'active'`,
         [companyId]
     );
     connection.end();
     return rows;
 }
 
+async function getInactiveCollaboratorsByCompanyId(companyId) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        `SELECT c.id, u.email, u.first_name, u.last_name, u.status
+         FROM collaborators AS c
+         JOIN users AS u ON c.user_id = u.id
+         WHERE c.company_id = ? AND u.status = 'inactive'`, // <- FILTRO PARA INATIVOS
+        [companyId]
+    );
+    connection.end();
+    return rows;
+}
+
+
+async function deactivateCollaborator(collaboratorId) {
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.beginTransaction();
+
+    try {
+        const [collaborators] = await connection.execute(
+            'SELECT user_id FROM collaborators WHERE id = ?',
+            [collaboratorId]
+        );
+
+        if (collaborators.length === 0) {
+            throw new Error('Colaborador não encontrado.');
+        }
+        const userId = collaborators[0].user_id;
+
+        // Atualiza o status na tabela users para 'inactive'
+        const [result] = await connection.execute(
+            'UPDATE users SET status = "inactive" WHERE id = ?',
+            [userId]
+        );
+
+        await connection.commit();
+        return result.affectedRows > 0;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.end();
+    }
+}
+
 module.exports = {
     getCollaboratorsByCompanyId,
-    addCollaborator
+    getInactiveCollaboratorsByCompanyId,
+    addCollaborator,
+    deactivateCollaborator
 };

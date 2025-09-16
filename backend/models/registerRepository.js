@@ -11,7 +11,11 @@ const dbConfig = {
 
 async function registerUserAndEntity(userData) {
     const connection = await mysql.createConnection(dbConfig);
-    const { first_name, last_name, email, password, role, company_name, company_cnpj, company_address, provider_name, provider_cnpj, provider_address } = userData;
+    const { 
+        first_name, last_name, email, password, role, 
+        company_name, company_cnpj, company_address, 
+        provider_name, provider_cnpj, provider_address 
+    } = userData;
     const hashedPassword = await bcrypt.hash(password, 10);
     
     await connection.beginTransaction();
@@ -28,12 +32,18 @@ async function registerUserAndEntity(userData) {
                 'INSERT INTO companies (name, cnpj, address, admin_id, status) VALUES (?, ?, ?, ?, ?)',
                 [company_name, company_cnpj, company_address, newUserId, 'pending']
             );
-        } else if (role === 'provider') {
-            await connection.execute(
+        } 
+        else if (role === 'provider') {
+            const [providerResult] = await connection.execute(
                 'INSERT INTO providers (name, cnpj, user_id) VALUES (?, ?, ?)',
                 [provider_name, provider_cnpj, newUserId]
             );
-            // lógica das academias
+            const newProviderId = providerResult.insertId;
+
+            await connection.execute(
+                'INSERT INTO gyms (provider_id, name, address, status) VALUES (?, ?, ?, ?)',
+                [newProviderId, provider_name, provider_address, 'pending']
+            );
         }
 
         await connection.commit();

@@ -11,7 +11,7 @@ const ProviderDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/providers/gyms', {
+            const response = await axios.get('http://localhost:3000/api/gyms', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

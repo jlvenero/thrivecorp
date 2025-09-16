@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './AdminAprovarAcademias.css';
 
 const AdminAprovarAcademias = () => {
     const [gyms, setGyms] = useState([]);
@@ -11,7 +12,7 @@ const AdminAprovarAcademias = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/gyms', {
+            const response = await axios.get('http://localhost:3000/api/gyms/all', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -40,31 +41,55 @@ const AdminAprovarAcademias = () => {
         }
     };
 
+    const handleReprove = async (gymId) => {
+        if (window.confirm("Tem certeza que deseja reprovar esta academia? Esta ação não pode ser desfeita.")) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.delete(`http://localhost:3000/api/gyms/${gymId}/reprove`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                fetchGyms();
+            } catch (err) {
+                setError('Falha ao reprovar a academia.');
+                console.error(err);
+            }
+        }
+    };
+
     useEffect(() => {
         fetchGyms();
     }, []);
 
     if (loading) return <p>Carregando academias...</p>;
-    if (error) return <p style={{ color: 'red' }}>{error}</p>;
+    if (error) return <p className="error-message">{error}</p>;
 
     return (
-        <div>
+        <div className="admin-aprovar-academias-container">
             <h3>Aprovação de Academias</h3>
             {gyms.length > 0 ? (
                 <ul>
                     {gyms.map(gym => (
                         <li key={gym.id}>
-                            {gym.name} (Endereço: {gym.address}) - Status: **{gym.status}**
+                            <div className="gym-info">
+                                {gym.name} (Endereço: {gym.address}) - <span className={`status ${gym.status}`}>Status: {gym.status}</span>
+                            </div>
                             {gym.status === 'pending' && (
-                                <button onClick={() => handleApprove(gym.id)}>
-                                    Aprovar
-                                </button>
+                                <div className="actions">
+                                    <button className="approve-btn" onClick={() => handleApprove(gym.id)}>
+                                        Aprovar
+                                    </button>
+                                    <button className="reprove-btn" onClick={() => handleReprove(gym.id)}>
+                                        Reprovar
+                                    </button>
+                                </div>
                             )}
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p>Nenhuma academia encontrada.</p>
+                <p>Nenhuma academia encontrada para aprovação.</p>
             )}
         </div>
     );

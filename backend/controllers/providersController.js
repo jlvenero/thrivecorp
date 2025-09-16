@@ -149,6 +149,21 @@ async function approveGym(req, res) {
     }
 }
 
+async function reproveGym(req, res) {
+    const { id } = req.params;
+    try {
+        // Chame a nova função específica para reprovação
+        const success = await providersRepository.reproveGymAndDeactivateProvider(id);
+        if (success) {
+            res.status(200).json({ message: 'Academia reprovada e usuário desativado com sucesso.' });
+        } else {
+            res.status(404).json({ message: 'Academia não encontrada para reprovação.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao reprovar a academia.' });
+    }
+}
+
 module.exports = {
     registerProvider,
     registerGym,
@@ -161,5 +176,6 @@ module.exports = {
     getGym,
     updateGym,
     deleteGym,
-    approveGym
+    approveGym,
+    reproveGym
 };

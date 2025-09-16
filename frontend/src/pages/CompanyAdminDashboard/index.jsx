@@ -8,7 +8,6 @@ const CompanyAdminDashboard = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Estados para o novo formulário de colaborador
     const [newCollaborator, setNewCollaborator] = useState({
         first_name: '',
         last_name: '',
@@ -21,9 +20,7 @@ const CompanyAdminDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const companyId = 3; // ID estático para o teste
-            
-            const response = await axios.get(`http://localhost:3000/api/company/${companyId}/collaborators`, {
+            const response = await axios.get(`http://localhost:3000/api/company/collaborators`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -48,19 +45,13 @@ const CompanyAdminDashboard = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const companyId = 3; // ID estático para o teste
-
-            // Endpoint POST para criar o colaborador (a ser criado no backend)
-            const response = await axios.post(`http://localhost:3000/api/company/${companyId}/collaborators`, newCollaborator, {
+            const response = await axios.post(`http://localhost:3000/api/company/collaborators`, newCollaborator, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             
-            console.log('Colaborador criado com sucesso:', response.data);
-            // Recarrega a lista de colaboradores após a criação
             fetchCollaborators();
-            // Limpa o formulário
             setNewCollaborator({ first_name: '', last_name: '', email: '', password: '' });
 
         } catch (err) {
@@ -68,6 +59,26 @@ const CompanyAdminDashboard = () => {
             console.error(err);
         }
     };
+
+    // NOVA FUNÇÃO PARA DESATIVAR
+    const handleDeactivate = async (collaboratorId) => {
+        if (window.confirm("Tem certeza que deseja desativar este colaborador? Ele não poderá mais acessar a plataforma.")) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.put(`http://localhost:3000/api/company/collaborators/${collaboratorId}/deactivate`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                // Recarrega a lista para mostrar o status atualizado
+                fetchCollaborators();
+            } catch (err) {
+                setError('Falha ao desativar o colaborador.');
+                console.error(err);
+            }
+        }
+    };
+
 
     useEffect(() => {
         fetchCollaborators();
@@ -80,7 +91,6 @@ const CompanyAdminDashboard = () => {
         <div className="company-admin-dashboard-container">
             <h3>Gerenciamento de Colaboradores</h3>
 
-            {/* Formulário para adicionar um novo colaborador */}
             <form onSubmit={handleSubmit}>
                 <h4>Adicionar Novo Colaborador</h4>
                 <input
@@ -120,12 +130,23 @@ const CompanyAdminDashboard = () => {
 
             <hr />
 
-            {/* Lista de colaboradores já existente */}
+            <h4>Lista de Colaboradores</h4>
             {collaborators.length > 0 ? (
                 <ul>
                     {collaborators.map(collaborator => (
                         <li key={collaborator.id}>
-                            {collaborator.first_name} {collaborator.last_name} ({collaborator.email}) - Status: {collaborator.status}
+                            <div className="collaborator-info">
+                                {collaborator.first_name} {collaborator.last_name} ({collaborator.email}) - Status: {collaborator.status}
+                            </div>
+                            {/* Mostra o botão apenas se o colaborador estiver ativo */}
+                            {collaborator.status === 'active' && (
+                                <button
+                                    className="deactivate-btn"
+                                    onClick={() => handleDeactivate(collaborator.id)}
+                                >
+                                    Desativar
+                                </button>
+                            )}
                         </li>
                     ))}
                 </ul>

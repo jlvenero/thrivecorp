@@ -112,11 +112,23 @@ async function approveCompany(id) {
     }
 }
 
+async function getCompanyByAdminId(adminId) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT * FROM companies WHERE admin_id = ?',
+        [adminId]
+    );
+    connection.end();
+    return rows[0] || null;
+}
+
+
 module.exports = {
     createCompany,
     getCompanyById,
     getAllCompanies,
     deactivateUser,
     deleteCompany,
-    approveCompany
+    approveCompany,
+    getCompanyByAdminId
 };

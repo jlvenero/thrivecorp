@@ -31,11 +31,14 @@ router.get('/providers/:id', authenticateToken, providersController.getProvider)
 router.put('/providers/:id', authenticateToken, providersController.updateProvider);
 router.delete('/providers/:id', authenticateToken, providersController.deleteProvider);
 
+router.get('/gyms/all', authenticateToken, authorize('thrive_admin'), providersController.listGyms);
+
 router.post('/gyms', authenticateToken, providersController.registerGym);
 router.get('/gyms', authenticateToken, getProviderDetails, providersController.listProviderGyms);
 router.get('/gyms/:id', authenticateToken, providersController.getGym);
 router.put('/gyms/:id', authenticateToken, providersController.updateGym);
 router.delete('/gyms/:id', authenticateToken, checkGymDeletePermission, providersController.deleteGym);
 router.put('/gyms/:id/approve', authenticateToken, authorize('thrive_admin'), providersController.approveGym);
+router.delete('/gyms/:id/reprove', authenticateToken, authorize('thrive_admin'), providersController.reproveGym);
 
 module.exports = router;
