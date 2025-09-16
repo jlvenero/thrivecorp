@@ -1,0 +1,45 @@
+.register-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: #fff;
+    text-align: center;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.register-form input,
+.register-form select,
+.register-form button {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.register-form button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+.register-form button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.link-login {
+    margin-top: 20px;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/index.jsx';
-import AdminAprovarEmpresas from './AdminAprovarEmpresas';
+import AdminAprovarEmpresas from './AdminAprovarEmpresas/index.jsx';
 import AdminAprovarAcademias from './AdminAprovarAcademias';
 import ProviderDashboard from './ProviderDashboard';
 import CompanyAdminDashboard from './CompanyAdminDashboard';

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import LoginPage from './pages/loginPage';
+import LoginPage from './pages/LoginPage/index';
+import RegisterPage from './pages/RegisterPage/index';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAprovarEmpresas from './pages/AdminAprovarEmpresas';
@@ -21,14 +22,16 @@ function App() {
         <div className="App">
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+
                 <Route element={<PrivateRoute />}>
-                    {/* Apenas uma rota protegida para o dashboard */}
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
                     <Route path="/admin/empresas" element={<AdminAprovarEmpresas />} />
                     <Route path="/admin/academias" element={<AdminAprovarAcademias />} />
                     <Route path="/prestador/academias" element={<ProviderDashboard />} />
-                     <Route path="/empresa/colaboradores" element={<CompanyAdminDashboard />} />
+                    <Route path="/empresa/colaboradores" element={<CompanyAdminDashboard />} />
                 </Route>
+                
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </div>

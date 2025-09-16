@@ -24,7 +24,7 @@ async function register(req, res) {
 }
 
 async function changePassword(req, res) {
-    const { userId, newPassword } = req.body; // Em produção, o userId viria do token JWT
+    const { userId, newPassword } = req.body;
     try {
         const success = await authService.changePassword(userId, newPassword);
         if (success) {
@@ -33,12 +33,32 @@ async function changePassword(req, res) {
             res.status(404).json({ message: 'Usuário não encontrado.' });
         }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
+    }
+}
+
+async function submitRegistrationRequest(req, res) {
+    const { 
+        first_name, last_name, email, password, role,
+        company_name, company_cnpj, company_address,
+        provider_name, provider_cnpj, provider_address 
+    } = req.body;
+    try {
+        const newUserId = await authService.submitRegistrationRequest({
+            first_name, last_name, email, password, role,
+            company_name, company_cnpj, company_address,
+            provider_name, provider_cnpj, provider_address
+        });
+        res.status(201).json({ message: 'Registro enviado com sucesso! Aguarde a aprovação.', id: newUserId });
+    } catch (error) {
+        console.error("Erro no registro:", error);
+        res.status(500).json({ error: 'Erro ao processar o registro.' });
     }
 }
 
 module.exports = {
     login,
     register,
-    changePassword,
+     changePassword,
+    submitRegistrationRequest
 };

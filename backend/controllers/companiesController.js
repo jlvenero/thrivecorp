@@ -10,17 +10,6 @@ async function createCompany(req, res) {
     }
 }
 
-async function getAllCompanies(req, res) {
-    console.log('Requisição chegou no controlador getAllCompanies!');
-    try {
-        const companies = await companiesRepository.getAllCompanies();
-        res.status(200).json(companies);
-    } catch (error) {
-        console.error("Erro ao buscar empresas:", error);
-        res.status(500).json({ error: 'Erro ao buscar a lista de empresas.' });
-    }
-}
-
 async function getCompany(req, res) {
     const { id } = req.params;
     try {
@@ -40,12 +29,21 @@ async function deleteCompany(req, res) {
     try {
         const success = await companiesRepository.deleteCompany(id);
         if (success) {
-            res.status(200).json({ message: 'Empresa excluída com sucesso.' });
+            res.status(200).json({ message: 'Empresa e usuário associado deletados com sucesso.' });
         } else {
-            res.status(404).json({ message: 'Empresa não encontrada.' });
+            res.status(404).json({ message: 'Empresa não encontrada para exclusão.' });
         }
     } catch (error) {
         res.status(500).json({ error: 'Erro ao excluir a empresa.' });
+    }
+}
+
+async function getAllCompanies(req, res) {
+    try {
+        const companies = await companiesRepository.getAllCompanies();
+        res.status(200).json(companies);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao buscar a lista de empresas.' });
     }
 }
 
@@ -54,7 +52,7 @@ async function approveCompany(req, res) {
     try {
         const success = await companiesRepository.approveCompany(id);
         if (success) {
-            res.status(200).json({ message: 'Empresa aprovada com sucesso!' });
+            res.status(200).json({ message: 'Empresa e usuário associado aprovados com sucesso.' });
         } else {
             res.status(404).json({ message: 'Empresa não encontrada para aprovação.' });
         }
@@ -65,8 +63,8 @@ async function approveCompany(req, res) {
 
 module.exports = {
     createCompany,
-    getAllCompanies,
     getCompany,
     deleteCompany,
+    getAllCompanies,
     approveCompany
 };

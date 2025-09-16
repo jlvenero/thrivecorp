@@ -36,30 +36,87 @@ async function getCompanyById(id) {
     return rows[0] || null;
 }
 
-async function deleteCompany(id) {
+async function deactivateUser(userId) {
     const connection = await mysql.createConnection(dbConfig);
     const [result] = await connection.execute(
-        'DELETE FROM companies WHERE id = ?',
-        [id]
+        'UPDATE users SET status = "inactive" WHERE id = ?',
+        [userId]
     );
     connection.end();
     return result.affectedRows > 0;
 }
 
+async function deleteCompany(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.beginTransaction();
+
+    try {
+        const [company] = await connection.execute(
+            'SELECT admin_id FROM companies WHERE id = ?',
+            [id]
+        );
+        const adminId = company[0]?.admin_id;
+
+        const [deleteCompanyResult] = await connection.execute(
+            'DELETE FROM companies WHERE id = ?',
+            [id]
+        );
+
+        if (deleteCompanyResult.affectedRows > 0 && adminId) {
+            await connection.execute(
+                'UPDATE users SET status = "inactive" WHERE id = ?',
+                [adminId]
+            );
+        }
+
+        await connection.commit();
+        connection.end();
+        return deleteCompanyResult.affectedRows > 0;
+    } catch (error) {
+        await connection.rollback();
+        connection.end();
+        throw error;
+    }
+}
+
 async function approveCompany(id) {
     const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.execute(
-        'UPDATE companies SET status = "active" WHERE id = ?',
-        [id]
-    );
-    connection.end();
-    return result.affectedRows > 0;
+    await connection.beginTransaction();
+
+    try {
+        const [company] = await connection.execute(
+            'SELECT admin_id FROM companies WHERE id = ?',
+            [id]
+        );
+        const adminId = company[0]?.admin_id;
+
+        const [updateCompanyResult] = await connection.execute(
+            'UPDATE companies SET status = "active" WHERE id = ?',
+            [id]
+        );
+
+        if (updateCompanyResult.affectedRows > 0 && adminId) {
+            await connection.execute(
+                'UPDATE users SET status = "active" WHERE id = ?',
+                [adminId]
+            );
+        }
+
+        await connection.commit();
+        connection.end();
+        return updateCompanyResult.affectedRows > 0;
+    } catch (error) {
+        await connection.rollback();
+        connection.end();
+        throw error;
+    }
 }
 
 module.exports = {
     createCompany,
     getCompanyById,
     getAllCompanies,
+    deactivateUser,
     deleteCompany,
     approveCompany
 };

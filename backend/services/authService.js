@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userRepository = require('../models/userRepository');
+const registerRepository = require('../models/registerRepository'); 
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -9,6 +10,10 @@ async function validateCredentialsAndGenerateToken(email, password) {
 
     if (!user) {
         return null;
+    }
+
+    if (user.status !== 'active') {
+        throw new Error('Conta pendente de aprovação ou inativa.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -24,6 +29,15 @@ async function validateCredentialsAndGenerateToken(email, password) {
     );
 
     return { token, user: { id: user.id, email: user.email, role: user.role } };
+}
+
+async function submitRegistrationRequest(userData) {
+    const existingUser = await userRepository.findByEmail(userData.email);
+    if (existingUser) {
+        throw new Error('E-mail já cadastrado.');
+    }
+    const newUserId = await registerRepository.registerUserAndEntity(userData);
+    return newUserId;
 }
 
 async function registerUser(userData) {
@@ -49,6 +63,7 @@ async function changePassword(userId, newPassword) {
 
 module.exports = {
     validateCredentialsAndGenerateToken,
+    submitRegistrationRequest,
     registerUser,
     changePassword,
 };
