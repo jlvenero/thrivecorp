@@ -91,3 +91,79 @@
 .access-table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
+
+.section-container {
+    margin-bottom: 30px;
+}
+
+.form-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.form-container input,
+.form-container textarea {
+    display: block;
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: sans-serif;
+}
+
+.form-container textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.form-container button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Estilos para a lista de planos */
+.plans-list {
+    list-style: none;
+    padding: 0;
+}
+
+.plans-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: #fff;
+}
+
+.plan-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.plan-description {
+    color: #555;
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
+.plan-price {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #28a745; /* Verde */
+}

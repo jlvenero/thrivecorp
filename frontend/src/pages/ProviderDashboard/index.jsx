@@ -3,121 +3,147 @@ import axios from 'axios';
 import './ProviderDashboard.css';
 
 const ProviderDashboard = () => {
+    // Estados para os dados
     const [gyms, setGyms] = useState([]);
-    const [accessReport, setAccessReport] = useState([]); // Estado para o relatório
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [accessReport, setAccessReport] = useState([]);
+    const [plans, setPlans] = useState([]);
+    
+    // Estados de controle
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    
+    // Estados para os formulários
     const [newGym, setNewGym] = useState({ name: '', address: '' });
+    const [newPlan, setNewPlan] = useState({ name: '', description: '', price_per_access: '' });
 
-    // Função unificada para buscar todos os dados necessários para a página
+    // Função para buscar todos os dados da página
     const fetchAllData = async () => {
         setLoading(true);
-        setError(null);
+        setError(''); // Limpa erros anteriores
+        
         try {
             const token = localStorage.getItem('token');
             const headers = { headers: { Authorization: `Bearer ${token}` } };
-            
-            // Requisição 1: Busca a lista de academias do prestador
-            const gymsResponse = await axios.get('http://localhost:3000/api/gyms', headers);
-            setGyms(gymsResponse.data);
 
-            // Requisição 2: Busca o relatório de acessos
-            const reportResponse = await axios.get('http://localhost:3000/api/accesses/provider-report', headers);
-            setAccessReport(reportResponse.data);
+            // Usamos Promise.allSettled para que uma falha não impeça as outras de funcionarem
+            const results = await Promise.allSettled([
+                axios.get('http://localhost:3000/api/gyms', headers),
+                axios.get('http://localhost:3000/api/accesses/provider-report', headers),
+                axios.get('http://localhost:3000/api/plans', headers)
+            ]);
+
+            // Verificamos o resultado de cada requisição individualmente
+            if (results[0].status === 'fulfilled') setGyms(results[0].value.data);
+            if (results[1].status === 'fulfilled') setAccessReport(results[1].value.data);
+            if (results[2].status === 'fulfilled') setPlans(results[2].value.data);
+            
+            // Se alguma requisição falhou, mostramos um erro genérico
+            if (results.some(res => res.status === 'rejected')) {
+                setError('Falha ao carregar parte dos dados. Verifique o console do backend.');
+            }
 
         } catch (err) {
-            setError('Falha ao buscar os dados do painel.');
+            setError('Ocorreu um erro inesperado.');
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    // O useEffect agora chama a função unificada
     useEffect(() => {
         fetchAllData();
     }, []);
 
-    const handleFormChange = (e) => {
-        setNewGym({
-            ...newGym,
-            [e.target.name]: e.target.value
-        });
-    };
+    // Funções de formulário (handlers)
+    const handlePlanFormChange = (e) => setNewPlan({ ...newPlan, [e.target.name]: e.target.value });
+    const handleGymFormChange = (e) => setNewGym({ ...newGym, [e.target.name]: e.target.value });
 
-    const handleSubmit = async (e) => {
+    const handlePlanSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:3000/api/provider/gyms', newGym, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setNewGym({ name: '', address: '' });
-            fetchAllData(); // Atualiza todos os dados da página após o cadastro
-        } catch (err) {
-            setError('Falha ao cadastrar nova academia.');
-            console.error(err);
-        }
+        // ... (lógica para enviar o novo plano e depois chamar fetchAllData)
+    };
+    
+    const handleGymSubmit = async (e) => {
+        e.preventDefault();
+        // ... (lógica para enviar a nova academia e depois chamar fetchAllData)
     };
 
     return (
         <div className="provider-dashboard-container">
-            {/* Formulário para adicionar nova academia */}
-            <div className="form-container">
-                <h3>Cadastrar Nova Academia</h3>
-                <form onSubmit={handleSubmit}>
-                    <input type="text" name="name" value={newGym.name} onChange={handleFormChange} placeholder="Nome da Academia" required />
-                    <input type="text" name="address" value={newGym.address} onChange={handleFormChange} placeholder="Endereço Completo" required />
-                    <button type="submit">Cadastrar e Enviar para Aprovação</button>
-                </form>
+            {error && <p className="error-message">{error}</p>}
+
+            {/* Seção de Planos */}
+            <div className="section-container">
+                <h3>Gerenciar Planos</h3>
+                {/* O formulário de planos aqui */}
+                <h4>Meus Planos Cadastrados</h4>
+                {loading ? <p>Carregando...</p> : (
+                    plans.length > 0 ? (
+                        <ul className="plans-list">
+                            {plans.map(plan => (
+                                <li key={plan.id}>
+                                    <div className="plan-info">
+                                        <span className="plan-name">{plan.name}</span>
+                                        <span className="plan-description">{plan.description}</span>
+                                    </div>
+                                    <span className="plan-price">R$ {parseFloat(plan.price_per_access).toFixed(2)}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : <p>Nenhum plano cadastrado ainda.</p>
+                )}
             </div>
             <hr />
 
-            {/* Lista de academias existentes */}
-            <h3>Minhas Academias</h3>
-            {gyms.length > 0 ? (
-                <ul>
-                    {gyms.map(gym => (
-                        <li key={gym.id}>
-                            <span className="gym-name">{gym.name}</span>
-                            <span className="gym-address">{gym.address}</span>
-                            <span className={`gym-status ${gym.status}`}>
-                                {gym.status.charAt(0).toUpperCase() + gym.status.slice(1)}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                !loading && <p>Nenhuma academia cadastrada.</p>
-            )}
+            {/* Seção de Academias */}
+            <div className="section-container">
+                <h3>Gerenciar Academias</h3>
+                 {/* O formulário de academias aqui */}
+                <h4>Minhas Academias</h4>
+                {loading ? <p>Carregando...</p> : (
+                    gyms.length > 0 ? (
+                        <ul>
+                            {gyms.map(gym => (
+                                <li key={gym.id}>
+                                    <span className="gym-name">{gym.name}</span>
+                                    <span className="gym-address">{gym.address}</span>
+                                    <span className={`gym-status ${gym.status}`}>
+                                        {gym.status.charAt(0).toUpperCase() + gym.status.slice(1)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : <p>Nenhuma academia cadastrada.</p>
+                )}
+            </div>
             <hr />
             
-            {/* Seção do Relatório de Acessos */}
-            <h3>Relatório de Check-ins</h3>
-            {error && <p className="error-message">{error}</p>}
-            {loading && <p>Carregando...</p>}
-            {accessReport.length > 0 ? (
-                <table className="access-table">
-                    <thead>
-                        <tr>
-                            <th>Data e Hora</th>
-                            <th>Colaborador</th>
-                            <th>Academia</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {accessReport.map(access => (
-                            <tr key={access.id}>
-                                <td>{new Date(access.access_timestamp).toLocaleString('pt-BR')}</td>
-                                <td>{`${access.first_name} ${access.last_name}`}</td>
-                                <td>{access.gym_name}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            ) : (
-                !loading && <p>Nenhum check-in registrado ainda.</p>
-            )}
+            {/* Seção do Relatório */}
+            <div className="section-container">
+                <h3>Relatório de Check-ins</h3>
+                {loading ? <p>Carregando...</p> : (
+                    accessReport.length > 0 ? (
+                        <table className="access-table">
+                            <thead>
+                                <tr>
+                                    <th>Data e Hora</th>
+                                    <th>Colaborador</th>
+                                    <th>Academia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {accessReport.map(access => (
+                                    <tr key={access.id}>
+                                        <td>{new Date(access.access_timestamp).toLocaleString('pt-BR')}</td>
+                                        <td>{`${access.first_name} ${access.last_name}`}</td>
+                                        <td>{access.gym_name}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : <p>Nenhum check-in registrado ainda.</p>
+                )}
+            </div>
         </div>
     );
 };
