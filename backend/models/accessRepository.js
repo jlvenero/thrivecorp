@@ -66,7 +66,7 @@ async function getAccessesByCompanyId(companyId) {
     }
 }
 
-
+// A correção crucial está aqui, garantindo que todas as funções sejam exportadas.
 module.exports = {
     recordAccess,
     getAccessesByProviderId,

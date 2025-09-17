@@ -16,6 +16,7 @@ const dbConfig = {
 app.use(express.json());
 app.use(cors());
 
+// Função para testar a conexão com o banco de dados
 async function testDbConnection() {
     try {
         const connection = await mysql.createConnection(dbConfig);
@@ -32,14 +33,18 @@ const authRoutes = require('./routes/auth');
 const companiesRoutes = require('./routes/companies');
 const collaboratorsRoutes = require('./routes/collaborators');
 const accessRoutes = require('./routes/accesses');
-const apiRoutes = require('./routes/index');
+const plansRoutes = require('./routes/plans');
+const profileRoutes = require('./routes/profile');
+const providersRoutes = require('./routes/providers');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/company', collaboratorsRoutes);
 app.use('/api/accesses', accessRoutes);
+app.use('/api/plans', plansRoutes);
 
-app.use('/api', apiRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', providersRoutes);
 
 app.get('/', (req, res) => {
     res.send('API ThriveCorp está funcionando!');
