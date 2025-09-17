@@ -29,16 +29,17 @@ async function testDbConnection() {
 testDbConnection();
 
 const authRoutes = require('./routes/auth');
-const profileRoutes = require('./routes/profile');
 const companiesRoutes = require('./routes/companies');
-const providersRoutes = require('./routes/providers');
-const collaboratorsRoutes = require('./routes/collaborators')
+const collaboratorsRoutes = require('./routes/collaborators');
+const accessRoutes = require('./routes/accesses');
+const apiRoutes = require('./routes/index');
 
 app.use('/api/auth', authRoutes);
-app.use('/api', profileRoutes)
 app.use('/api/companies', companiesRoutes);
-app.use('/api', providersRoutes);
 app.use('/api/company', collaboratorsRoutes);
+app.use('/api/accesses', accessRoutes);
+
+app.use('/api', apiRoutes);
 
 app.get('/', (req, res) => {
     res.send('API ThriveCorp está funcionando!');

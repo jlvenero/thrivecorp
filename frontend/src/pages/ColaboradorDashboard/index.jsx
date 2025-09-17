@@ -6,6 +6,7 @@ const ColaboradorDashboard = () => {
     const [gyms, setGyms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const fetchGyms = async () => {
         setLoading(true);
@@ -30,18 +31,45 @@ const ColaboradorDashboard = () => {
         fetchGyms();
     }, []);
 
-    if (loading) return <p>Carregando academias...</p>;
-    if (error) return <p className="error-message">{error}</p>;
+    const handleCheckIn = async (gymId, gymName) => {
+        // Limpa mensagens anteriores
+        setError('');
+        setSuccessMessage('');
+
+        if (window.confirm(`Confirmar check-in na academia ${gymName}?`)) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.post('http://localhost:3000/api/accesses', 
+                    { gymId: gymId }, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setSuccessMessage(`Check-in em ${gymName} realizado com sucesso!`);
+            } catch (err) {
+                setError('Falha ao realizar o check-in.');
+                console.error(err);
+            }
+        }
+    };
 
     return (
         <div className="colaborador-dashboard-container">
             <h3>Academias Disponíveis</h3>
+            {successMessage && <p className="success-message">{successMessage}</p>}
+            {error && <p className="error-message">{error}</p>}
             {gyms.length > 0 ? (
                 <ul>
                     {gyms.map(gym => (
                         <li key={gym.id}>
-                            <span className="gym-name">{gym.name}</span>
-                            <span className="gym-address">{gym.address}</span>
+                            <div className="gym-details">
+                                <span className="gym-name">{gym.name}</span>
+                                <span className="gym-address">{gym.address}</span>
+                            </div>
+                            <button 
+                                className="checkin-btn"
+                                onClick={() => handleCheckIn(gym.id, gym.name)}
+                            >
+                                Fazer Check-in
+                            </button>
                         </li>
                     ))}
                 </ul>
