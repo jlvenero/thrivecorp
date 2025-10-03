@@ -56,9 +56,19 @@ async function registerUser(userData) {
     return newUserId;
 }
 
-async function changePassword(userId, newPassword) {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    return await userRepository.updatePassword(userId, hashedPassword);
+async function changePassword(userId, oldPassword, newPassword) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+        throw new Error('Usuário não encontrado.');
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+        throw new Error('A senha antiga está incorreta.');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    return await userRepository.updatePassword(userId, hashedNewPassword);
 }
 
 module.exports = {

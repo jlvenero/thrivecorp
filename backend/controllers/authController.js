@@ -24,16 +24,20 @@ async function register(req, res) {
 }
 
 async function changePassword(req, res) {
-    const { userId, newPassword } = req.body;
+    const userId = req.user.userId;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ error: 'Senha antiga e nova senha são obrigatórias.' });
+    }
+
     try {
-        const success = await authService.changePassword(userId, newPassword);
+        const success = await authService.changePassword(userId, oldPassword, newPassword);
         if (success) {
             res.status(200).json({ message: 'Senha alterada com sucesso.' });
-        } else {
-            res.status(404).json({ message: 'Usuário não encontrado.' });
         }
     } catch (error) {
-    res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 }
 
@@ -59,6 +63,6 @@ async function submitRegistrationRequest(req, res) {
 module.exports = {
     login,
     register,
-     changePassword,
+    changePassword,
     submitRegistrationRequest
 };

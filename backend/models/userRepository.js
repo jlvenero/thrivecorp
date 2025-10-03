@@ -18,6 +18,16 @@ async function findByEmail(email) {
     return rows[0] || null;
 }
 
+async function findById(id) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT * FROM users WHERE id = ?',
+        [id]
+    );
+    connection.end();
+    return rows[0] || null;
+}
+
 async function createUser(userData) {
     const connection = await mysql.createConnection(dbConfig);
     const { email, password, role, first_name, last_name } = userData;
@@ -41,6 +51,7 @@ async function updatePassword(userId, newHashedPassword) {
 
 module.exports = {
     findByEmail,
+    findById,
     createUser,
     updatePassword,
 };

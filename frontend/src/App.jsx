@@ -11,6 +11,7 @@ import PrivateRoute from './routes/PrivateRoute';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 import AdminBillingReport from './pages/AdminBillingReport';
 import PendingApprovalPage from './pages/PendingApprovalPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
 
                 <Route element={<PrivateRoute />}>
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
+                    <Route path="/change-password" element={<ChangePasswordPage />} />
                     <Route path="/admin/empresas" element={<AdminAprovarEmpresas />} />
                     <Route path="/admin/academias" element={<AdminAprovarAcademias />} />
                     <Route path="/admin/billing" element={<AdminBillingReport />} /> 

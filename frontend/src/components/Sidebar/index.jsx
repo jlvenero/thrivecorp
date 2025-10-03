@@ -11,6 +11,7 @@ const Sidebar = () => {
       <nav>
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
+          <li><Link to="/change-password">Alterar Senha</Link></li>
 
           {userRole === 'thrive_admin' && (
             <>
