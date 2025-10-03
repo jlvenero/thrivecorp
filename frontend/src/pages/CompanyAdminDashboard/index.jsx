@@ -104,10 +104,33 @@ const CompanyAdminDashboard = () => {
         }
     };
 
-    // Gera opções para os últimos 5 anos para o filtro
+    // Nova função para o download
+    const handleDownload = async () => {
+        setError('');
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:3000/api/accesses/download-company-report`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { year: selectedDate.year, month: selectedDate.month },
+                responseType: 'blob', // Essencial para o download
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const fileName = `relatorio-thrivecorp-${selectedDate.year}-${selectedDate.month}.csv`;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+        } catch (err) {
+            setError('Falha ao baixar o relatório. Verifique se existem dados no período selecionado.');
+            console.error(err);
+        }
+    };
+
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
-    
-    // Calcula o custo total do relatório atual
     const totalCost = accessReport.reduce((sum, access) => sum + parseFloat(access.price_per_access || 0), 0);
 
     return (
@@ -156,6 +179,9 @@ const CompanyAdminDashboard = () => {
                         <option key={year} value={year}>{year}</option>
                     ))}
                 </select>
+                <button onClick={handleDownload} disabled={accessReport.length === 0} style={{ marginLeft: '10px' }}>
+                    Baixar Relatório (CSV)
+                </button>
             </div>
             
             {loading && <p>Carregando relatório...</p>}
