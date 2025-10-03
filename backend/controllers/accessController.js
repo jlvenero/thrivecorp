@@ -1,4 +1,5 @@
 const accessRepository = require('../models/accessRepository');
+const { Parser } = require('json2csv');
 
 async function recordAccess(req, res) {
     const userId = req.user.userId;
@@ -72,10 +73,47 @@ async function getCompanyAccessDetails(req, res) {
     }
 }
 
+async function downloadCompanyAccessReport(req, res) {
+    const { companyId } = req;
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+        return res.status(400).json({ error: 'Ano e mês são obrigatórios.' });
+    }
+
+    try {
+        const reportData = await accessRepository.getCompanyAccessDetails(companyId, year, month);
+
+        if (reportData.length === 0) {
+            return res.status(404).json({ message: 'Nenhum dado encontrado para gerar o relatório.' });
+        }
+
+        const fields = [
+            { label: 'Data e Hora', value: 'access_timestamp' },
+            { label: 'Nome', value: 'first_name' },
+            { label: 'Sobrenome', value: 'last_name' },
+            { label: 'Academia', value: 'gym_name' },
+            { label: 'Custo', value: 'price_per_access' }
+        ];
+        
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(reportData);
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment(`relatorio-thrivecorp-${year}-${month}.csv`);
+        res.send(csv);
+
+    } catch (error) {
+        console.error('Erro ao gerar relatório CSV:', error);
+        res.status(500).json({ error: 'Erro ao gerar o relatório.' });
+    }
+}
+
 module.exports = {
     recordAccess,
     getProviderAccessReport,
     getCompanyAccessReport,
     getMonthlyBillingReport,
-    getCompanyAccessDetails
+    getCompanyAccessDetails,
+    downloadCompanyAccessReport
 };

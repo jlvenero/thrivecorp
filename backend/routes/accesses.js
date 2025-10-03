@@ -13,5 +13,7 @@ router.get('/company-report', authenticateToken, getCompanyDetails, accessContro
 router.get('/billing-report', authenticateToken, authorize('thrive_admin'), accessController.getMonthlyBillingReport);
 router.get('/company-details-report', authenticateToken, getCompanyDetails, accessController.getCompanyAccessDetails);
 
+router.get('/download-company-report', authenticateToken, getCompanyDetails, accessController.downloadCompanyAccessReport);
+
 
 module.exports = router;
