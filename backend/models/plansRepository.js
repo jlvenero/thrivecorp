@@ -26,4 +26,30 @@ async function getPlansByProviderId(providerId) {
     return rows;
 }
 
-module.exports = { createPlan, getPlansByProviderId };
+async function updatePlan(planId, planData) {
+    const { name, description, price_per_access } = planData;
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+        'UPDATE plans SET name = ?, description = ?, price_per_access = ? WHERE id = ?',
+        [name, description, price_per_access, planId]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+async function deletePlan(planId) {
+    const connection = await mysql.createConnection(dbConfig);
+    const [result] = await connection.execute(
+        'DELETE FROM plans WHERE id = ?',
+        [planId]
+    );
+    connection.end();
+    return result.affectedRows > 0;
+}
+
+module.exports = { 
+    createPlan,
+    getPlansByProviderId,
+    updatePlan,
+    deletePlan
+};

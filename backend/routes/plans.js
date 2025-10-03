@@ -7,4 +7,8 @@ const getProviderDetails = require('../middlewares/providerDetailsMiddleware');
 router.post('/', authenticateToken, getProviderDetails, plansController.createPlan);
 router.get('/', authenticateToken, getProviderDetails, plansController.getMyPlans);
 
+router.put('/:planId', authenticateToken, getProviderDetails, plansController.updatePlan);
+router.delete('/:planId', authenticateToken, getProviderDetails, plansController.deletePlan);
+
+
 module.exports = router;
