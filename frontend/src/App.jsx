@@ -10,6 +10,8 @@ import ProviderDashboard from './pages/ProviderDashboard';
 import PrivateRoute from './routes/PrivateRoute';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 import AdminBillingReport from './pages/AdminBillingReport';
+import PendingApprovalPage from './pages/PendingApprovalPage';
+
 
 function App() {
     const navigate = useNavigate();
@@ -24,6 +26,7 @@ function App() {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/pending-approval" element={<PendingApprovalPage />} />
 
                 <Route element={<PrivateRoute />}>
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
