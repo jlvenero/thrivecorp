@@ -39,8 +39,43 @@ async function getCompanyAccessReport(req, res) {
     }
 }
 
+async function getMonthlyBillingReport(req, res) {
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+        return res.status(400).json({ error: 'Ano e mês são obrigatórios.' });
+    }
+
+    try {
+        const report = await accessRepository.getMonthlyBillingReport(year, month);
+        res.status(200).json(report);
+    } catch (error) {
+        console.error('Erro ao buscar relatório de faturamento mensal:', error);
+        res.status(500).json({ error: 'Erro ao buscar relatório de faturamento.' });
+    }
+}
+
+async function getCompanyAccessDetails(req, res) {
+    const { companyId } = req; // Injetado pelo middleware getCompanyDetails
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+        return res.status(400).json({ error: 'Ano e mês são obrigatórios.' });
+    }
+
+    try {
+        const report = await accessRepository.getCompanyAccessDetails(companyId, year, month);
+        res.status(200).json(report);
+    } catch (error) {
+        console.error('Erro ao buscar relatório detalhado da empresa:', error);
+        res.status(500).json({ error: 'Erro ao buscar relatório detalhado.' });
+    }
+}
+
 module.exports = {
     recordAccess,
     getProviderAccessReport,
-    getCompanyAccessReport
+    getCompanyAccessReport,
+    getMonthlyBillingReport,
+    getCompanyAccessDetails
 };

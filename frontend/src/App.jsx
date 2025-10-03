@@ -9,6 +9,7 @@ import AdminAprovarAcademias from './pages/AdminAprovarAcademias';
 import ProviderDashboard from './pages/ProviderDashboard';
 import PrivateRoute from './routes/PrivateRoute';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
+import AdminBillingReport from './pages/AdminBillingReport';
 
 function App() {
     const navigate = useNavigate();
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} />} />
                     <Route path="/admin/empresas" element={<AdminAprovarEmpresas />} />
                     <Route path="/admin/academias" element={<AdminAprovarAcademias />} />
+                    <Route path="/admin/billing" element={<AdminBillingReport />} /> 
                     <Route path="/prestador/academias" element={<ProviderDashboard />} />
                     <Route path="/empresa/colaboradores" element={<CompanyAdminDashboard />} />
                 </Route>

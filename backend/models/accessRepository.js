@@ -66,9 +66,74 @@ async function getAccessesByCompanyId(companyId) {
     }
 }
 
-// A correção crucial está aqui, garantindo que todas as funções sejam exportadas.
+async function getMonthlyBillingReport(year, month) {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        const [rows] = await connection.execute(`
+            SELECT
+                comp.id AS company_id,
+                comp.name AS company_name,
+                COUNT(a.id) AS total_accesses,
+                SUM(p.price_per_access) AS total_cost
+            FROM accesses AS a
+            JOIN users AS u ON a.user_id = u.id
+            JOIN collaborators AS collabs ON u.id = collabs.user_id
+            JOIN companies AS comp ON collabs.company_id = comp.id
+            JOIN gyms AS g ON a.gym_id = g.id
+            JOIN providers AS prov ON g.provider_id = prov.id
+            LEFT JOIN (
+                SELECT 
+                    provider_id, 
+                    price_per_access,
+                    ROW_NUMBER() OVER(PARTITION BY provider_id ORDER BY id) as rn
+                FROM plans
+            ) AS p ON prov.id = p.provider_id AND p.rn = 1
+            WHERE YEAR(a.access_timestamp) = ? AND MONTH(a.access_timestamp) = ?
+            GROUP BY comp.id, comp.name
+            ORDER BY comp.name;
+        `, [year, month]);
+        return rows;
+    } finally {
+        connection.end();
+    }
+}
+
+async function getCompanyAccessDetails(companyId, year, month) {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        const [rows] = await connection.execute(`
+            SELECT 
+                a.id,
+                a.access_timestamp,
+                u.first_name,
+                u.last_name,
+                g.name AS gym_name,
+                p.price_per_access
+            FROM accesses AS a
+            JOIN users AS u ON a.user_id = u.id
+            JOIN collaborators AS collabs ON u.id = collabs.user_id
+            JOIN gyms AS g ON a.gym_id = g.id
+            JOIN providers AS prov ON g.provider_id = prov.id
+            LEFT JOIN (
+                SELECT 
+                    provider_id, 
+                    price_per_access,
+                    ROW_NUMBER() OVER(PARTITION BY provider_id ORDER BY id) as rn
+                FROM plans
+            ) AS p ON prov.id = p.provider_id AND p.rn = 1
+            WHERE collabs.company_id = ? AND YEAR(a.access_timestamp) = ? AND MONTH(a.access_timestamp) = ?
+            ORDER BY a.access_timestamp DESC;
+        `, [companyId, year, month]);
+        return rows;
+    } finally {
+        connection.end();
+    }
+}
+
 module.exports = {
     recordAccess,
     getAccessesByProviderId,
-    getAccessesByCompanyId
+    getAccessesByCompanyId,
+    getMonthlyBillingReport,
+    getCompanyAccessDetails
 };

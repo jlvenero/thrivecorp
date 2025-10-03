@@ -3,10 +3,15 @@ import axios from 'axios';
 import './CompanyAdminDashboard.css';
 
 const CompanyAdminDashboard = () => {
+    // Estados para os dados
     const [collaborators, setCollaborators] = useState([]);
     const [accessReport, setAccessReport] = useState([]);
+
+    // Estados de controle da interface
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Estado para o formulário de novo colaborador
     const [newCollaborator, setNewCollaborator] = useState({
         first_name: '',
         last_name: '',
@@ -14,38 +19,61 @@ const CompanyAdminDashboard = () => {
         password: ''
     });
 
-    const fetchAllData = async () => {
+    // Estado para os filtros de data do relatório
+    const [selectedDate, setSelectedDate] = useState({
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1
+    });
+
+    // Função para buscar a lista de colaboradores
+    const fetchCollaborators = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { headers: { Authorization: `Bearer ${token}` } };
+            const collaboratorsResponse = await axios.get('http://localhost:3000/api/company/collaborators', headers);
+            setCollaborators(collaboratorsResponse.data);
+        } catch (err) {
+            setError('Falha ao buscar a lista de colaboradores.');
+            console.error(err);
+        }
+    };
+
+    // Função para buscar o relatório de acessos com base na data selecionada
+    const fetchAccessReport = async () => {
         setLoading(true);
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const headers = { headers: { Authorization: `Bearer ${token}` } };
-            
-            // Busca a lista de colaboradores
-            const collaboratorsResponse = await axios.get('http://localhost:3000/api/company/collaborators', headers);
-            setCollaborators(collaboratorsResponse.data);
-
-            // Busca o relatório de acessos da empresa
-            const reportResponse = await axios.get('http://localhost:3000/api/accesses/company-report', headers);
-            setAccessReport(reportResponse.data);
-
+            const response = await axios.get(`http://localhost:3000/api/accesses/company-details-report`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { year: selectedDate.year, month: selectedDate.month }
+            });
+            setAccessReport(response.data);
         } catch (err) {
-            setError('Falha ao buscar os dados da empresa.');
+            setError('Falha ao buscar o relatório de acessos.');
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
+    // Efeito para buscar dados: colaboradores (uma vez) e relatório (quando a data muda)
     useEffect(() => {
-        fetchAllData();
+        fetchCollaborators();
     }, []);
 
+    useEffect(() => {
+        fetchAccessReport();
+    }, [selectedDate]);
+
+    // Handlers para os formulários e filtros
+    const handleDateChange = (e) => {
+        const { name, value } = e.target;
+        setSelectedDate(prev => ({ ...prev, [name]: parseInt(value) }));
+    };
+
     const handleFormChange = (e) => {
-        setNewCollaborator({
-            ...newCollaborator,
-            [e.target.name]: e.target.value
-        });
+        setNewCollaborator({ ...newCollaborator, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
@@ -56,7 +84,7 @@ const CompanyAdminDashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNewCollaborator({ first_name: '', last_name: '', email: '', password: '' });
-            fetchAllData(); // Atualiza todos os dados
+            fetchCollaborators(); // Atualiza apenas a lista de colaboradores
         } catch (err) {
             setError('Falha ao criar o colaborador.');
         }
@@ -69,15 +97,23 @@ const CompanyAdminDashboard = () => {
                 await axios.put(`http://localhost:3000/api/company/collaborators/${collaboratorId}/deactivate`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                fetchAllData(); // Atualiza todos os dados
+                fetchCollaborators(); // Atualiza apenas a lista de colaboradores
             } catch (err) {
                 setError('Falha ao desativar o colaborador.');
             }
         }
     };
 
+    // Gera opções para os últimos 5 anos para o filtro
+    const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+    
+    // Calcula o custo total do relatório atual
+    const totalCost = accessReport.reduce((sum, access) => sum + parseFloat(access.price_per_access || 0), 0);
+
     return (
         <div className="company-admin-dashboard-container">
+            {error && <p className="error-message">{error}</p>}
+
             <h3>Gerenciamento de Colaboradores</h3>
             <form onSubmit={handleSubmit}>
                 <h4>Adicionar Novo Colaborador</h4>
@@ -106,30 +142,52 @@ const CompanyAdminDashboard = () => {
             </ul>
             <hr />
 
-            <h3>Relatório Consolidado de Acessos</h3>
-            {error && <p className="error-message">{error}</p>}
-            {loading && <p>Carregando...</p>}
-            {accessReport.length > 0 ? (
-                <table className="access-table">
-                    <thead>
-                        <tr>
-                            <th>Data e Hora</th>
-                            <th>Colaborador</th>
-                            <th>Academia</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {accessReport.map(access => (
-                            <tr key={access.id}>
-                                <td>{new Date(access.access_timestamp).toLocaleString('pt-BR')}</td>
-                                <td>{`${access.first_name} ${access.last_name}`}</td>
-                                <td>{access.gym_name}</td>
+            <h3>Relatório Detalhado de Acessos</h3>
+            <div className="filters">
+                <label>Mês:</label>
+                <select name="month" value={selectedDate.month} onChange={handleDateChange}>
+                    {Array.from({ length: 12 }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                    ))}
+                </select>
+                <label>Ano:</label>
+                <select name="year" value={selectedDate.year} onChange={handleDateChange}>
+                    {yearOptions.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                    ))}
+                </select>
+            </div>
+            
+            {loading && <p>Carregando relatório...</p>}
+            
+            {!loading && accessReport.length > 0 ? (
+                <>
+                    <table className="access-table">
+                        <thead>
+                            <tr>
+                                <th>Data e Hora</th>
+                                <th>Colaborador</th>
+                                <th>Academia</th>
+                                <th>Custo</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {accessReport.map(access => (
+                                <tr key={access.id}>
+                                    <td>{new Date(access.access_timestamp).toLocaleString('pt-BR')}</td>
+                                    <td>{`${access.first_name} ${access.last_name}`}</td>
+                                    <td>{access.gym_name}</td>
+                                    <td>R$ {parseFloat(access.price_per_access || 0).toFixed(2)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div className="total-cost">
+                        <strong>Custo Total do Mês: R$ {totalCost.toFixed(2)}</strong>
+                    </div>
+                </>
             ) : (
-                !loading && <p>Nenhum acesso registrado pelos colaboradores ainda.</p>
+                !loading && <p>Nenhum acesso registrado pelos colaboradores neste período.</p>
             )}
         </div>
     );
