@@ -11,87 +11,6 @@
     margin-bottom: 20px;
 }
 
-.form-container {
-    margin-bottom: 30px;
-}
-
-.form-container form input {
-    display: block;
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.form-container form button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.provider-dashboard-container ul {
-    list-style: none;
-    padding: 0;
-}
-
-.provider-dashboard-container li {
-    display: grid;
-    grid-template-columns: 2fr 3fr 1fr;
-    gap: 15px;
-    align-items: center;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
-}
-
-.gym-name {
-    font-weight: bold;
-}
-
-.gym-status {
-    font-weight: bold;
-    text-align: right;
-}
-
-.gym-status.pending {
-    color: #ff9800;
-}
-
-.gym-status.active {
-    color: #4caf50;
-}
-
-.error-message {
-    color: #f44336;
-}
-
-.access-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.access-table th, .access-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-}
-
-.access-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.access-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
 .section-container {
     margin-bottom: 30px;
 }
@@ -129,34 +48,35 @@
     cursor: pointer;
 }
 
-/* Estilos para a lista de planos */
-.plans-list {
+.provider-dashboard-container ul {
     list-style: none;
     padding: 0;
 }
 
-.plans-list li {
-    display: flex;
-    justify-content: space-between;
+/* --- ESTILOS UNIFICADOS PARA AS LISTAS DE PLANOS E ACADEMIAS --- */
+.provider-dashboard-container li {
+    display: grid;
+    grid-template-columns: 3fr 1fr auto; /* Colunas para [Info], [Preço/Status], e [Ações] */
+    gap: 15px;
     align-items: center;
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
     margin-bottom: 10px;
-    background-color: #fff;
+    background-color: #f9f9f9;
 }
 
-.plan-info {
+.plan-info, .gym-info {
     display: flex;
     flex-direction: column;
 }
 
-.plan-name {
+.plan-name, .gym-name {
     font-weight: bold;
     font-size: 1.1em;
 }
 
-.plan-description {
+.plan-description, .gym-address {
     color: #555;
     font-size: 0.9em;
     margin-top: 4px;
@@ -166,4 +86,79 @@
     font-weight: bold;
     font-size: 1.2em;
     color: #28a745; /* Verde */
+    text-align: right;
+}
+
+.gym-status {
+    font-weight: bold;
+    text-align: right;
+}
+
+.gym-status.pending {
+    color: #ff9800; /* Laranja */
+}
+
+.gym-status.active {
+    color: #4caf50; /* Verde */
+}
+
+/* --- ESTILOS PARA OS BOTÕES DE AÇÃO --- */
+.plan-actions,
+.gym-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.plan-actions button,
+.gym-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    background-color: #6c757d; /* Cinza para Editar */
+    transition: background-color 0.2s;
+}
+
+.plan-actions button:hover,
+.gym-actions button:hover {
+    background-color: #5a6268;
+}
+
+.plan-actions .delete-btn,
+.gym-actions .delete-btn {
+    background-color: #dc3545; /* Vermelho para Deletar */
+}
+
+.plan-actions .delete-btn:hover,
+.gym-actions .delete-btn:hover {
+    background-color: #c82333;
+}
+
+
+/* --- ESTILOS DA TABELA DE RELATÓRIO --- */
+.access-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.access-table th, .access-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.access-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.access-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.error-message {
+    color: #f44336;
 }
