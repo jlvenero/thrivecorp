@@ -62,3 +62,10 @@
     margin-top: 10px;
     text-align: center;
 }
+
+.actions .delete-btn {
+    background-color: #dc3545;
+}
+.actions .delete-btn:hover {
+    background-color: #c82333;
+}
