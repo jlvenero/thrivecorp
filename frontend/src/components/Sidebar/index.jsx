@@ -18,6 +18,7 @@ const Sidebar = () => {
               <li><Link to="/admin/empresas">Aprovar Empresas</Link></li>
               <li><Link to="/admin/academias">Aprovar Academias</Link></li>
               <li><Link to="/admin/billing">Extrato de Faturamento</Link></li>
+              <li><Link to="/admin/manage-admins">Gerenciar Admins</Link></li>
             </>
           )}
           {userRole === 'company_admin' && (

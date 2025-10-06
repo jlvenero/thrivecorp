@@ -30,10 +30,10 @@ async function findById(id) {
 
 async function createUser(userData) {
     const connection = await mysql.createConnection(dbConfig);
-    const { email, password, role, first_name, last_name } = userData;
+    const { email, password, role, first_name, last_name, status = 'pending' } = userData; 
     const [result] = await connection.execute(
-        'INSERT INTO users (email, password, role, first_name, last_name) VALUES (?, ?, ?, ?, ?)',
-        [email, password, role, first_name, last_name]
+        'INSERT INTO users (email, password, role, first_name, last_name, status) VALUES (?, ?, ?, ?, ?, ?)',
+        [email, password, role, first_name, last_name, status]
     );
     connection.end();
     return result.insertId;

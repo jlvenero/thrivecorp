@@ -12,6 +12,7 @@ import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 import AdminBillingReport from './pages/AdminBillingReport';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import AdminManageAdmins from './pages/AdminManageAdmins';
 
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
                     <Route path="/admin/billing" element={<AdminBillingReport />} /> 
                     <Route path="/prestador/academias" element={<ProviderDashboard />} />
                     <Route path="/empresa/colaboradores" element={<CompanyAdminDashboard />} />
+                    <Route path="/admin/manage-admins" element={<AdminManageAdmins />} />
                 </Route>
                 
                 <Route path="*" element={<Navigate to="/login" replace />} />

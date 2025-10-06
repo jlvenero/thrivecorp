@@ -36,12 +36,14 @@ const accessRoutes = require('./routes/accesses');
 const plansRoutes = require('./routes/plans');
 const profileRoutes = require('./routes/profile');
 const providersRoutes = require('./routes/providers');
+const adminRoutes = require('./routes/admin');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/company', collaboratorsRoutes);
 app.use('/api/accesses', accessRoutes);
 app.use('/api/plans', plansRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use('/api', profileRoutes);
 app.use('/api', providersRoutes);
