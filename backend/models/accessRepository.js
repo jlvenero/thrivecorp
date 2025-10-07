@@ -74,7 +74,8 @@ async function getMonthlyBillingReport(year, month) {
                 comp.id AS company_id,
                 comp.name AS company_name,
                 COUNT(a.id) AS total_accesses,
-                SUM(p.price_per_access) AS total_cost
+                SUM(p.price_per_access) AS total_cost,
+                IFNULL(bh.status, 'pending') AS billing_status
             FROM accesses AS a
             JOIN users AS u ON a.user_id = u.id
             JOIN collaborators AS collabs ON u.id = collabs.user_id
@@ -88,10 +89,12 @@ async function getMonthlyBillingReport(year, month) {
                     ROW_NUMBER() OVER(PARTITION BY provider_id ORDER BY id) as rn
                 FROM plans
             ) AS p ON prov.id = p.provider_id AND p.rn = 1
+            LEFT JOIN billing_history AS bh 
+                ON comp.id = bh.company_id AND bh.billing_year = ? AND bh.billing_month = ?
             WHERE YEAR(a.access_timestamp) = ? AND MONTH(a.access_timestamp) = ?
-            GROUP BY comp.id, comp.name
+            GROUP BY comp.id, comp.name, bh.status
             ORDER BY comp.name;
-        `, [year, month]);
+        `, [year, month, year, month]);
         return rows;
     } finally {
         connection.end();
