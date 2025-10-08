@@ -1,52 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+// src/pages/Dashboard.jsx
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { Box } from '@mui/material';
 import Sidebar from '../components/Sidebar/index.jsx';
-import AdminAprovarEmpresas from './AdminAprovarEmpresas/index.jsx';
-import AdminAprovarAcademias from './AdminAprovarAcademias/index.jsx';
-import ProviderDashboard from './ProviderDashboard';
-import CompanyAdminDashboard from './CompanyAdminDashboard';
-import ColaboradorDashboard from './ColaboradorDashboard/index.jsx';
 
 const Dashboard = ({ onLogout }) => {
-    const [userRole, setUserRole] = useState(null);
-    const location = useLocation();
-
-    useEffect(() => {
-        const role = localStorage.getItem('userRole');
-        setUserRole(role);
-    }, []);
-
-    const renderContent = () => {
-        if (userRole === 'thrive_admin') {
-        if (location.pathname === '/admin/academias') {
-            return <AdminAprovarAcademias />;
-        }
-        // Se a role é 'thrive_admin', renderiza o painel de aprovação de empresas por padrão
-        return <AdminAprovarEmpresas />;
-        } else if (userRole === 'provider') {
-            if (location.pathname === '/prestador/academias') {
-                return <ProviderDashboard />;
-            }
-            return <div>Bem-vindo, Prestador! Use o menu lateral para gerenciar suas academias.</div>;
-        } else if (userRole === 'company_admin') {
-            if (location.pathname === '/empresa/colaboradores') {
-                return <CompanyAdminDashboard />;
-            }
-            return <div>Bem-vindo, Administrador da Empresa! Use o menu lateral para gerenciar.</div>;
-        } else {
-            return <ColaboradorDashboard />;
-        }
-    };
-
-    return (
-        <div style={{ display: 'flex' }}>
-            <Sidebar />
-            <div style={{ flex: 1, padding: '20px' }}>
-                {renderContent()}
-                <button onClick={onLogout}>Sair</button>
-            </div>
-        </div>
-    );
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <Sidebar onLogout={onLogout} />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          bgcolor: 'background.default',
+          height: '100vh',
+          overflow: 'auto',
+        }}
+      >
+        <Outlet />
+      </Box>
+    </Box>
+  );
 };
 
 export default Dashboard;

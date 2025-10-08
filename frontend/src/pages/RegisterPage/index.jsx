@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
-// Importações do Material-UI para o tema
+// Importações do Material-UI
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {
     Box, TextField, Button, Typography, Container, InputAdornment,
@@ -11,34 +11,20 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// 1. Definição do tema com a paleta "Inovação e Equilíbrio"
+// Tema (pode ser movido para um arquivo separado como theme.js)
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#4B0082', // Roxo Profundo (Inovação)
-    },
-    secondary: {
-      main: '#98FF98', // Verde Menta (Vitalidade)
-    },
-    text: {
-      primary: '#212529', // Cinza Escuro para textos principais
-      secondary: '#6c757d', // Cinza médio para textos secundários
-    },
-    background: {
-      default: '#FFFFFF', // Fundo branco e limpo
-    },
+    primary: { main: '#4B0082' },
+    secondary: { main: '#98FF98' },
+    text: { primary: '#212529', secondary: '#6c757d' },
+    background: { default: '#FFFFFF' },
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
-    button: {
-      textTransform: 'none',
-      fontWeight: 'bold',
-    },
+    button: { textTransform: 'none', fontWeight: 'bold' },
   },
 });
 
-
-// 2. Logo atualizado para usar a cor primária do tema
 const LogoIcon = () => (
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" rx="6" fill={theme.palette.primary.main}/>
@@ -47,9 +33,11 @@ const LogoIcon = () => (
 );
 
 const RegisterPage = () => {
+    // 1. ADICIONADO 'company_address' AO ESTADO INICIAL
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', email: '', password: '', confirmPassword: '', role: 'company_admin',
-        company_name: '', company_cnpj: '', provider_name: '', provider_cnpj: '', provider_address: '',
+        company_name: '', company_cnpj: '', company_address: '', // <-- ADICIONADO AQUI
+        provider_name: '', provider_cnpj: '', provider_address: '',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -81,7 +69,6 @@ const RegisterPage = () => {
     };
 
     return (
-        // 3. Aplicando o tema a todos os componentes filhos
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="sm">
                 <CssBaseline />
@@ -123,6 +110,8 @@ const RegisterPage = () => {
                                 <>
                                     <Grid item xs={12}><TextField name="company_name" required fullWidth label="Nome da Empresa" value={formData.company_name} onChange={handleFormChange} /></Grid>
                                     <Grid item xs={12}><TextField name="company_cnpj" required fullWidth label="CNPJ da Empresa" value={formData.company_cnpj} onChange={handleFormChange} /></Grid>
+                                    {/* 2. ADICIONADO CAMPO DE ENDEREÇO DA EMPRESA */}
+                                    <Grid item xs={12}><TextField name="company_address" required fullWidth label="Endereço da Empresa" value={formData.company_address} onChange={handleFormChange} /></Grid>
                                 </>
                             ) : (
                                 <>
@@ -133,7 +122,6 @@ const RegisterPage = () => {
                             )}
                         </Grid>
                         
-                        {/* Botão de registro herda a cor primária do tema */}
                         <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem', '&:hover': { backgroundColor: '#3a0066' } }}>
                             {loading ? 'Criando conta...' : 'Criar conta'}
                         </Button>
