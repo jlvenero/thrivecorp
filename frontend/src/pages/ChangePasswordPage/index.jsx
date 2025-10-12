@@ -1,13 +1,33 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './ChangePasswordPage.css';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+    Box,
+    Typography,
+    Paper,
+    TextField,
+    Button,
+    Alert,
+    CircularProgress,
+    Stack,
+    Link,
+    IconButton,
+    InputAdornment
+} from '@mui/material';
+import LockResetIcon from '@mui/icons-material/LockReset';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const ChangePasswordPage = () => {
     const [formData, setFormData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Estados para controlar a visibilidade das senhas
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,6 +40,11 @@ const ChangePasswordPage = () => {
 
         if (formData.newPassword !== formData.confirmPassword) {
             setError('A nova senha e a confirmação não coincidem.');
+            return;
+        }
+
+        if (formData.newPassword.length < 3) { // Exemplo de validação simples
+            setError('A nova senha deve ter pelo menos 3 caracteres.');
             return;
         }
 
@@ -42,20 +67,98 @@ const ChangePasswordPage = () => {
     };
 
     return (
-        <div className="change-password-container">
-            <h3>Alterar Senha</h3>
-            <form onSubmit={handleSubmit} className="change-password-form">
-                <input type="password" name="oldPassword" value={formData.oldPassword} onChange={handleChange} placeholder="Senha Atual" required />
-                <input type="password" name="newPassword" value={formData.newPassword} onChange={handleChange} placeholder="Nova Senha" required />
-                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Confirme a Nova Senha" required />
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Alterando...' : 'Alterar Senha'}
-                </button>
-            </form>
-            {error && <p className="error-message">{error}</p>}
-            {success && <p className="success-message">{success}</p>}
-            <Link to="/dashboard" className="back-link">Voltar para o Dashboard</Link>
-        </div>
+        <>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                <LockResetIcon sx={{ color: 'primary.main', fontSize: '2.5rem' }} />
+                <Typography variant="h5">Alterar Senha</Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Para sua segurança, recomendamos o uso de uma senha forte.
+            </Typography>
+
+            <Paper elevation={0} sx={{ p: 4, borderRadius: '12px', maxWidth: '500px' }}>
+                <Box component="form" onSubmit={handleSubmit}>
+                    <Stack spacing={2}>
+                        <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+                            Atualize sua senha
+                        </Typography>
+
+                        {error && <Alert severity="error">{error}</Alert>}
+                        {success && <Alert severity="success">{success}</Alert>}
+
+                        <TextField
+                            label="Senha Atual"
+                            name="oldPassword"
+                            type={showOldPassword ? 'text' : 'password'}
+                            value={formData.oldPassword}
+                            onChange={handleChange}
+                            required
+                            fullWidth
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                                            {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <TextField
+                            label="Nova Senha"
+                            name="newPassword"
+                            type={showNewPassword ? 'text' : 'password'}
+                            value={formData.newPassword}
+                            onChange={handleChange}
+                            required
+                            fullWidth
+                             InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                                            {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <TextField
+                            label="Confirme a Nova Senha"
+                            name="confirmPassword"
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                            fullWidth
+                             InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <Box sx={{ pt: 2, textAlign: 'center' }}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                disabled={loading}
+                                size="large"
+                                sx={{ py: 1.5, fontWeight: 'bold', width: '100%', mb: 2 }}
+                            >
+                                {loading ? <CircularProgress size={26} color="inherit" /> : 'Alterar Senha'}
+                            </Button>
+                            <Link component={RouterLink} to="/dashboard" underline="hover">
+                                Voltar para o Dashboard
+                            </Link>
+                        </Box>
+                    </Stack>
+                </Box>
+            </Paper>
+        </>
     );
 };
 
