@@ -1,252 +1,86 @@
-/* Estilo geral do container principal */
 .company-admin-dashboard-container {
-    padding: 2rem;
-    background-color: #f8f9fa; /* Um cinza bem claro para o fundo */
-}
-
-/* Cabeçalho da página */
-.dashboard-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #dee2e6; /* Linha sutil de separação */
-}
-
-.header-icon {
-    font-size: 2.5rem;
-    color: #22c55e; /* Roxo Profundo */
-}
-
-.dashboard-header h2 {
-    margin: 0;
-    font-size: 1.75rem;
-    font-weight: 500;
-    color: #212529;
-}
-
-.dashboard-header p {
-    margin: 0;
-    color: #6c757d;
-}
-
-/* Seções de conteúdo */
-.content-section {
+    padding: 20px;
     background-color: #ffffff;
-    padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.content-section h3 {
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #343a40;
-}
-
-/* Barra de busca */
-.search-bar-container {
-    position: relative;
-    margin-bottom: 2rem;
-}
-
-.search-bar-container .search-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #adb5bd;
-}
-
-.search-bar-container input {
-    width: 100%;
-    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.search-bar-container input:focus {
-    outline: none;
-    border-color: #22c55e;
-    box-shadow: #22c55e;
-}
-
-/* Formulário de adição */
-.add-collaborator-form .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.add-collaborator-form input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.add-btn {
-    background-color: #28a745; /* Verde para adicionar */
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.add-btn:hover {
-    background-color: #218838;
-}
-
-/* === MELHORIAS NA LISTA DE COLABORADORES === */
-.collaborators-list {
+.company-admin-dashboard-container ul {
     list-style: none;
     padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem; /* Espaçamento entre os cards */
 }
 
-.collaborators-list li {
+.company-admin-dashboard-container li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    border: 1px solid #e9ecef;
-    border-radius: 8px; /* Bordas arredondadas para o card */
-    background-color: #fff;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
 }
 
-.collaborators-list li:hover {
-    border-color: #ced4da;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.error-message {
+    color: red;
 }
 
-.collaborator-info {
-    display: flex;
-    flex-direction: column;
+/* Estilos para o formulário */
+.company-admin-dashboard-container form {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
 }
 
-.collaborator-name {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #212529;
+.company-admin-dashboard-container form input {
+    display: block;
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 
-.collaborator-email {
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin: 0.25rem 0;
-}
-
-.collaborator-status {
-    font-size: 0.8rem;
-    color: #28a745;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.deactivate-btn {
-    background-color: #dc3545; /* Vermelho para desativar */
+.company-admin-dashboard-container form button {
+    padding: 10px 15px;
+    background-color: #007bff;
     color: white;
-    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
+}
+
+/* Estilo para o botão de desativar */
+.deactivate-btn {
+    padding: 5px 10px;
+    background-color: #f44336; /* Vermelho */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .deactivate-btn:hover {
-    background-color: #c82333;
-}
-/* === FIM DAS MELHORIAS === */
-
-
-/* Filtros e Relatório */
-.filters {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    background-color: #d32f2f;
 }
 
-.filters label {
-    font-weight: 500;
-}
-
-.filters select {
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-}
-
-.download-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.download-btn:hover {
-    background-color: #0056b3;
-}
-.download-btn:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-}
-
-/* Tabela de acessos */
 .access-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
+    margin-top: 20px;
 }
 
-.access-table th,
-.access-table td {
-    padding: 0.75rem 1rem;
+.access-table th, .access-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #dee2e6;
 }
 
 .access-table th {
-    font-weight: 600;
-    color: #495057;
-    background-color: #f8f9fa;
-}
-
-.total-cost {
-    text-align: right;
-    font-size: 1.1rem;
+    background-color: #f2f2f2;
     font-weight: bold;
-    margin-top: 1.5rem;
-    color: #212529;
 }
 
-.error-message {
-    color: #dc3545;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
+.access-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
