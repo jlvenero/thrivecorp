@@ -2,9 +2,23 @@ const plansRepository = require('../models/plansRepository');
 
 async function createPlan(req, res) {
     const providerId = req.provider.id;
-    const { name, description, price_per_access } = req.body;
+    const { gym_id, name, description, price_per_access } = req.body;
+
+    // Validação de entrada
+    if (!gym_id || !name || !price_per_access) {
+        return res.status(400).json({ error: 'Academia, nome e preço são obrigatórios.' });
+    }
+
     try {
-        const newPlanId = await plansRepository.createPlan({ provider_id: providerId, name, description, price_per_access });
+        // VERIFICAÇÃO: Checa se já existe um plano para esta academia
+        const existingPlans = await plansRepository.getPlansByProviderId(providerId);
+        const planExistsForGym = existingPlans.some(plan => plan.gym_id === gym_id);
+
+        if (planExistsForGym) {
+            return res.status(409).json({ error: 'Já existe um plano cadastrado para esta academia.' });
+        }
+
+        const newPlanId = await plansRepository.createPlan({ provider_id: providerId, gym_id, name, description, price_per_access });
         res.status(201).json({ message: 'Plano criado com sucesso!', id: newPlanId });
     } catch (error) {
         console.error('Erro detalhado ao criar plano:', error); 

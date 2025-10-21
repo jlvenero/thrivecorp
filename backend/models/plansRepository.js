@@ -9,11 +9,11 @@ const dbConfig = {
 };
 
 async function createPlan(planData) {
-    const { provider_id, name, description, price_per_access } = planData;
+    const { provider_id, gym_id, name, description, price_per_access } = planData; // Adicione gym_id
     const connection = await mysql.createConnection(dbConfig);
     const [result] = await connection.execute(
-        'INSERT INTO plans (provider_id, name, description, price_per_access) VALUES (?, ?, ?, ?)',
-        [provider_id, name, description, price_per_access]
+        'INSERT INTO plans (provider_id, gym_id, name, description, price_per_access) VALUES (?, ?, ?, ?, ?)', // Adicione gym_id
+        [provider_id, gym_id, name, description, price_per_access] // Adicione gym_id
     );
     connection.end();
     return result.insertId;
@@ -21,7 +21,8 @@ async function createPlan(planData) {
 
 async function getPlansByProviderId(providerId) {
     const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT * FROM plans WHERE provider_id = ?', [providerId]);
+    // Vamos selecionar o gym_id também
+    const [rows] = await connection.execute('SELECT id, name, description, price_per_access, gym_id FROM plans WHERE provider_id = ?', [providerId]);
     connection.end();
     return rows;
 }
