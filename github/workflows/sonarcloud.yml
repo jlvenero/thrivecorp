@@ -1,0 +1,45 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main # Analisa quando houver push na branch main
+  pull_request:
+    types: [opened, synchronize, reopened] # Analisa em Pull Requests
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Necessário para análise de PRs e blame do git
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use a versão do Node.js compatível com seu projeto
+          cache: 'npm' # Habilita cache para 'npm install'
+          cache-dependency-path: | # Especifica onde estão os package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # Instalar dependências para ambos os módulos (necessário para algumas análises)
+      - name: Install Backend Dependencies
+        run: npm install --prefix backend
+      - name: Install Frontend Dependencies
+        run: npm install --prefix frontend
+
+      # (Opcional) Executar testes e gerar relatório de cobertura aqui, se configurado
+      # - name: Run Frontend Tests & Coverage
+      #   run: npm test --prefix frontend -- --coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token padrão do GitHub para PRs
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Seu token do SonarCloud (configurado nos Secrets do Repo)
+        # Se você estiver usando o arquivo sonar-project.properties,
+        # geralmente não precisa passar argumentos adicionais aqui.
+        # A action detectará o arquivo .properties automaticamente.
