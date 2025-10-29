@@ -14,6 +14,7 @@ router.get('/billing-report', authenticateToken, authorize('thrive_admin'), acce
 router.get('/company-details-report', authenticateToken, getCompanyDetails, accessController.getCompanyAccessDetails);
 
 router.get('/download-company-report', authenticateToken, getCompanyDetails, accessController.downloadCompanyAccessReport);
+router.get('/download-billing-report', authenticateToken, authorize('thrive_admin'), accessController.downloadBillingReport);
 
 
 module.exports = router;

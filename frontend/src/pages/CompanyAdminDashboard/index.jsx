@@ -132,28 +132,69 @@ const CompanyAdminDashboard = () => {
         }
     };
 
-    const handleDownload = async () => {
-        setError('');
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/accesses/download-company-report`, {
-                headers: { Authorization: `Bearer ${token}` },
-                params: { year: selectedDate.year, month: selectedDate.month },
-                responseType: 'blob',
-            });
+    const handleDownload = () => {
+        setError(null); // Limpa erro anterior
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            const fileName = `relatorio-thrivecorp-${selectedDate.year}-${selectedDate.month}.csv`;
+        if (!accessReport || accessReport.length === 0) {
+            setError('Não há dados de acesso no período selecionado para exportar.');
+            return;
+        }
+
+        // --- Início da Lógica de Geração de CSV no Frontend ---
+
+        // 1. Definir Cabeçalhos (com acentos)
+        const headers = [
+            'Data e Hora',
+            'Nome',
+            'Sobrenome',
+            'Academia',
+            'Custo'
+        ];
+
+        // 2. Mapear os dados filtrados (accessReport) para linhas do CSV
+        const rows = accessReport.map(access => [
+            // Formatar data/hora para padrão brasileiro
+            `"${new Date(access.access_timestamp).toLocaleString('pt-BR')}"`,
+            `"${access.first_name.replace(/"/g, '""')}"`, // Trata aspas
+            `"${access.last_name.replace(/"/g, '""')}"`, // Trata aspas
+            `"${access.gym_name.replace(/"/g, '""')}"`, // Trata aspas
+            // Formatar número para padrão CSV (ponto como decimal, sem R$)
+            parseFloat(access.price_per_access || 0).toFixed(2).replace('.', ',') // Troca ponto por vírgula para Excel PT-BR
+        ]);
+
+        // 3. Montar o conteúdo CSV (Cabeçalhos + Linhas)
+        // Adiciona o BOM (Byte Order Mark) para UTF-8, melhorando compatibilidade com Excel
+        let csvContent = '\uFEFF';
+        csvContent += headers.join(';') + '\n'; // Usar ponto e vírgula como separador
+        rows.forEach(row => {
+            csvContent += row.join(';') + '\n';
+        });
+
+         // Adiciona linha de Total
+         const totalCost = accessReport.reduce((sum, access) => sum + parseFloat(access.price_per_access || 0), 0);
+         csvContent += '\n'; // Linha em branco
+         csvContent += `TOTAL;;;;${totalCost.toFixed(2).replace('.', ',')}\n`; // Adiciona o total na última coluna
+
+
+        // 4. Criar Blob e Link para Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) { // Checa se o browser suporta download
+            const url = URL.createObjectURL(blob);
+            // Nome do arquivo dinâmico
+            const fileName = `relatorio-acessos-${selectedDate.year}-${String(selectedDate.month).padStart(2, '0')}.csv`;
+
+            link.setAttribute('href', url);
             link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
-            link.remove();
-
-        } catch (err) {
-            setError('Falha ao baixar o relatório. Verifique se existem dados no período selecionado.');
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url); // Libera memória
+        } else {
+             setError('Seu navegador não suporta a função de download direto.');
         }
+        // --- Fim da Lógica de Geração de CSV no Frontend ---
     };
 
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);

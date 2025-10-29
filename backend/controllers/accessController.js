@@ -106,6 +106,52 @@ async function downloadCompanyAccessReport(req, res) {
     } catch (error) {
         console.error('Erro ao gerar relatório CSV:', error);
         res.status(500).json({ error: 'Erro ao gerar o relatório.' });
+    } 
+}
+
+async function downloadBillingReport(req, res) {
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+        return res.status(400).json({ error: 'Ano e mês são obrigatórios.' });
+    }
+
+    try {
+        const reportData = await accessRepository.getMonthlyBillingReport(year, month);
+
+        if (reportData.length === 0) {
+            return res.status(404).json({ message: 'Nenhum dado encontrado para gerar o relatório.' });
+        }
+
+        // Mapear status para 'Faturado' ou 'Pendente'
+        const processedData = reportData.map(item => ({
+            ...item,
+            billing_status_label: item.billing_status === 'sent' ? 'Faturado' : 'Pendente',
+            // Formatar custo para padrão brasileiro (ex: 1234.50 -> 1.234,50)
+            total_cost_formatted: parseFloat(item.total_cost || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        }));
+
+
+        const fields = [
+            { label: 'Empresa', value: 'company_name' },
+            { label: 'Total de Acessos', value: 'total_accesses' },
+            // Usar o valor formatado para o CSV
+            { label: 'Custo Total', value: 'total_cost_formatted' },
+            // Usar o label do status
+            { label: 'Status da Fatura', value: 'billing_status_label' }
+        ];
+
+        // Configuração do Parser para UTF-8 com BOM (melhor compatibilidade com Excel)
+        const json2csvParser = new Parser({ fields, withBOM: true });
+        const csv = json2csvParser.parse(processedData);
+
+        res.header('Content-Type', 'text/csv; charset=utf-8'); // Especificar charset UTF-8
+        res.attachment(`relatorio-faturamento-${year}-${month}.csv`);
+        res.send(csv); // Envia o CSV diretamente
+
+    } catch (error) {
+        console.error('Erro ao gerar relatório CSV de faturamento:', error);
+        res.status(500).json({ error: 'Erro ao gerar o relatório.' });
     }
 }
 
@@ -115,5 +161,6 @@ module.exports = {
     getCompanyAccessReport,
     getMonthlyBillingReport,
     getCompanyAccessDetails,
-    downloadCompanyAccessReport
+    downloadCompanyAccessReport,
+    downloadBillingReport
 };
