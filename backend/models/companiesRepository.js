@@ -48,34 +48,78 @@ async function deactivateUser(userId) {
 
 async function deleteCompany(id) {
     const connection = await mysql.createConnection(dbConfig);
-    await connection.beginTransaction();
+    await connection.beginTransaction(); // Inicia a transação
 
     try {
-        const [company] = await connection.execute(
+        // 1. Encontrar o ID do admin da empresa
+        const [companyResult] = await connection.execute(
             'SELECT admin_id FROM companies WHERE id = ?',
             [id]
         );
-        const adminId = company[0]?.admin_id;
 
+        if (companyResult.length === 0) {
+            // Se a empresa não existe, encerra a transação e retorna false
+            await connection.rollback();
+            connection.end();
+            return false; // Indica que a empresa não foi encontrada
+        }
+        const adminId = companyResult[0]?.admin_id;
+
+        // 2. Encontrar os IDs de todos os colaboradores da empresa
+        const [collaboratorsResult] = await connection.execute(
+            'SELECT user_id FROM collaborators WHERE company_id = ?',
+            [id]
+        );
+        const collaboratorUserIds = collaboratorsResult.map(collab => collab.user_id);
+
+        // 3. Montar a lista de todos os User IDs a serem desativados (Admin + Colaboradores)
+        const userIdsToDeactivate = [];
+        if (adminId) {
+            userIdsToDeactivate.push(adminId);
+        }
+        userIdsToDeactivate.push(...collaboratorUserIds);
+
+        // 4. Desativar todos os usuários encontrados (se houver algum)
+        if (userIdsToDeactivate.length > 0) {
+            // Usar a cláusula IN para atualizar múltiplos usuários de uma vez
+            // O .map(?) cria os placeholders necessários (?, ?, ...)
+            const placeholders = userIdsToDeactivate.map(() => '?').join(',');
+            await connection.execute(
+                `UPDATE users SET status = "inactive" WHERE id IN (${placeholders})`,
+                userIdsToDeactivate
+            );
+            console.log(`Desativados usuários com IDs: ${userIdsToDeactivate.join(', ')}`); // Log para depuração
+        }
+
+        // 5. (Opcional, mas recomendado) Deletar os registros de colaboradores associados
+        if (collaboratorUserIds.length > 0) {
+             await connection.execute(
+                'DELETE FROM collaborators WHERE company_id = ?',
+                [id]
+            );
+            console.log(`Deletados colaboradores da empresa ID: ${id}`); // Log para depuração
+        }
+
+
+        // 6. Deletar a empresa
         const [deleteCompanyResult] = await connection.execute(
             'DELETE FROM companies WHERE id = ?',
             [id]
         );
+        console.log(`Deletada empresa ID: ${id}`); // Log para depuração
 
-        if (deleteCompanyResult.affectedRows > 0 && adminId) {
-            await connection.execute(
-                'UPDATE users SET status = "inactive" WHERE id = ?',
-                [adminId]
-            );
-        }
 
+        // 7. Se tudo correu bem, confirma a transação
         await connection.commit();
         connection.end();
-        return deleteCompanyResult.affectedRows > 0;
+        return deleteCompanyResult.affectedRows > 0; // Retorna true se a empresa foi deletada
+
     } catch (error) {
+        // Se qualquer operação falhar, desfaz todas as alterações
         await connection.rollback();
         connection.end();
-        throw error;
+        console.error('Erro ao deletar empresa e desativar usuários:', error); // Log detalhado do erro
+        throw error; // Propaga o erro para o controller
     }
 }
 
