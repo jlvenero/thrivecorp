@@ -1,4 +1,5 @@
 const providersRepository = require('../models/providersRepository');
+const plansRepository = require('../models/plansRepository');
 
 async function registerProvider(req, res) {
     const { user_id, name, cnpj } = req.body;
@@ -78,6 +79,21 @@ async function deleteProvider(req, res) {
         }
     } catch (error) {
         res.status(500).json({ error: 'Erro ao deletar prestador.' });
+    }
+}
+
+async function getGymPlan(req, res) {
+    const { gymId } = req.params;
+    try {
+        const plan = await plansRepository.getPlanByGymId(gymId);
+        if (plan) {
+            res.json(plan);
+        } else {
+            res.status(404).json({ message: 'Nenhum plano encontrado para esta academia.' });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar plano da academia:', error);
+        res.status(500).json({ error: 'Erro ao buscar o plano da academia.' });
     }
 }
 
@@ -200,5 +216,6 @@ module.exports = {
     approveGym,
     reproveGym,
     addOwnGym,
-    listAllGymsForAdmin
+    listAllGymsForAdmin,
+    getGymPlan
 };

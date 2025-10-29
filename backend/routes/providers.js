@@ -33,6 +33,7 @@ router.post('/gyms', authenticateToken, providersController.registerGym);
 
 // ROTA PARA O DASHBOARD DO COLABORADOR (CORREÇÃO)
 router.get('/collaborator/gyms', authenticateToken, providersController.listGyms);
+router.get('/gyms/:gymId/plan', authenticateToken, providersController.getGymPlan);
 
 // Rotas de visualização de academias para diferentes perfis
 router.get('/gyms/all', authenticateToken, authorize('thrive_admin'), providersController.listAllGymsForAdmin);
