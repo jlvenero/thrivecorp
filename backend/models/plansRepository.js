@@ -48,9 +48,23 @@ async function deletePlan(planId) {
     return result.affectedRows > 0;
 }
 
+async function getPlanByGymId(gymId) {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        const [rows] = await connection.execute(
+            'SELECT * FROM plans WHERE gym_id = ?',
+            [gymId]
+        );
+        return rows[0] || null; // Retorna o plano ou nulo se não encontrar
+    } finally {
+        connection.end();
+    }
+}
+
 module.exports = { 
     createPlan,
     getPlansByProviderId,
     updatePlan,
-    deletePlan
+    deletePlan,
+    getPlanByGymId
 };
