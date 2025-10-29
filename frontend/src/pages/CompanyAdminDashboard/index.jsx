@@ -3,12 +3,13 @@ import axios from 'axios';
 import {
     Box, Typography, Paper, TextField, Button, Grid, Modal, List,
     ListItem, ListItemText, Divider, IconButton, Table, TableBody,
-    TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, InputLabel, FormControl
+    TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, InputLabel, FormControl,
+    Tooltip // <-- Adicionado Tooltip
 } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import PersonOffIcon from '@mui/icons-material/PersonOff';
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from '@mui/icons-material/Download'; // <-- Importado Ícone de Download
 import './CompanyAdminDashboard.css';
 
 // Estilo para o Modal
@@ -132,70 +133,92 @@ const CompanyAdminDashboard = () => {
         }
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
+        setError('');
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:3000/api/accesses/download-company-report`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { year: selectedDate.year, month: selectedDate.month },
+                responseType: 'blob',
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const fileName = `relatorio-thrivecorp-${selectedDate.year}-${selectedDate.month}.csv`;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+        } catch (err) {
+            setError('Falha ao baixar o relatório. Verifique se existem dados no período selecionado.');
+        }
+    };
+
+    // *** NOVA FUNÇÃO PARA DOWNLOAD DE COLABORADORES ***
+    const handleDownloadCollaborators = () => {
         setError(null); // Limpa erro anterior
 
-        if (!accessReport || accessReport.length === 0) {
-            setError('Não há dados de acesso no período selecionado para exportar.');
+        // Filtra para garantir que apenas colaboradores ativos sejam exportados (redundante se a API já filtra)
+        const activeCollaborators = collaborators.filter(c => c.status === 'active');
+
+        if (!activeCollaborators || activeCollaborators.length === 0) {
+            setError('Não há colaboradores ativos para exportar.');
             return;
         }
 
-        // --- Início da Lógica de Geração de CSV no Frontend ---
-
-        // 1. Definir Cabeçalhos (com acentos)
+        // 1. Definir Cabeçalhos
         const headers = [
-            'Data e Hora',
-            'Nome',
+            'Primeiro Nome',
             'Sobrenome',
-            'Academia',
-            'Custo'
+            'Email'
         ];
 
-        // 2. Mapear os dados filtrados (accessReport) para linhas do CSV
-        const rows = accessReport.map(access => [
-            // Formatar data/hora para padrão brasileiro
-            `"${new Date(access.access_timestamp).toLocaleString('pt-BR')}"`,
-            `"${access.first_name.replace(/"/g, '""')}"`, // Trata aspas
-            `"${access.last_name.replace(/"/g, '""')}"`, // Trata aspas
-            `"${access.gym_name.replace(/"/g, '""')}"`, // Trata aspas
-            // Formatar número para padrão CSV (ponto como decimal, sem R$)
-            parseFloat(access.price_per_access || 0).toFixed(2).replace('.', ',') // Troca ponto por vírgula para Excel PT-BR
+        // Função auxiliar para escapar aspas duplas dentro dos campos
+        const escapeCsvCell = (cellData) => {
+            const stringData = String(cellData || ''); // Garante que é string
+            if (stringData.includes('"') || stringData.includes(';') || stringData.includes('\n')) {
+                // Se contém aspas, ponto-e-vírgula ou nova linha, coloca entre aspas e duplica as aspas internas
+                return `"${stringData.replace(/"/g, '""')}"`;
+            }
+            return stringData;
+        };
+
+
+        // 2. Mapear os dados para linhas do CSV
+        const rows = activeCollaborators.map(collab => [
+            escapeCsvCell(collab.first_name),
+            escapeCsvCell(collab.last_name),
+            escapeCsvCell(collab.email)
         ]);
 
-        // 3. Montar o conteúdo CSV (Cabeçalhos + Linhas)
-        // Adiciona o BOM (Byte Order Mark) para UTF-8, melhorando compatibilidade com Excel
-        let csvContent = '\uFEFF';
-        csvContent += headers.join(';') + '\n'; // Usar ponto e vírgula como separador
+        // 3. Montar o conteúdo CSV
+        let csvContent = '\uFEFF'; // BOM UTF-8
+        csvContent += headers.join(';') + '\n';
         rows.forEach(row => {
             csvContent += row.join(';') + '\n';
         });
 
-         // Adiciona linha de Total
-         const totalCost = accessReport.reduce((sum, access) => sum + parseFloat(access.price_per_access || 0), 0);
-         csvContent += '\n'; // Linha em branco
-         csvContent += `TOTAL;;;;${totalCost.toFixed(2).replace('.', ',')}\n`; // Adiciona o total na última coluna
-
-
         // 4. Criar Blob e Link para Download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        if (link.download !== undefined) { // Checa se o browser suporta download
+        if (link.download !== undefined) {
             const url = URL.createObjectURL(blob);
-            // Nome do arquivo dinâmico
-            const fileName = `relatorio-acessos-${selectedDate.year}-${String(selectedDate.month).padStart(2, '0')}.csv`;
-
+            const fileName = `lista-colaboradores-${new Date().toISOString().split('T')[0]}.csv`; // Nome do arquivo com data
             link.setAttribute('href', url);
             link.setAttribute('download', fileName);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(url); // Libera memória
+            URL.revokeObjectURL(url);
         } else {
-             setError('Seu navegador não suporta a função de download direto.');
+            setError('Seu navegador não suporta a função de download direto.');
         }
-        // --- Fim da Lógica de Geração de CSV no Frontend ---
     };
+    // *** FIM DA NOVA FUNÇÃO ***
 
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
     const totalCost = accessReport.reduce((sum, access) => sum + parseFloat(access.price_per_access || 0), 0);
@@ -228,30 +251,59 @@ const CompanyAdminDashboard = () => {
                         <GroupIcon color="primary" />
                         <Typography variant="h5">Gerenciamento de Colaboradores</Typography>
                     </Box>
-                    <IconButton color="primary" onClick={handleOpenModal}>
-                        <AddCircleIcon sx={{ fontSize: 30 }} />
-                    </IconButton>
+                    {/* Container para os botões de ação */}
+                     <Box>
+                         {/* *** BOTÃO DE DOWNLOAD ADICIONADO *** */}
+                         <Tooltip title="Baixar Lista de Colaboradores (CSV)">
+                             {/* Desabilitar se não houver colaboradores ativos */}
+                             <span> {/* Span necessário para Tooltip em botão desabilitado */}
+                                <IconButton
+                                    color="primary"
+                                    onClick={handleDownloadCollaborators}
+                                    disabled={!collaborators.some(c => c.status === 'active')} // Desabilita se não houver ativos
+                                >
+                                    <DownloadIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                        <Tooltip title="Adicionar Novo Colaborador">
+                            <IconButton color="primary" onClick={handleOpenModal}>
+                                <AddCircleIcon sx={{ fontSize: 30 }} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Box>
                 <List>
-                    {collaborators.map((collaborator, index) => (
-                         collaborator.status === 'active' && (
+                   {/* Filtra para exibir apenas ativos na lista E mostra mensagem se não houver */}
+                   {collaborators.filter(c => c.status === 'active').length > 0 ? (
+                       collaborators.map((collaborator, index) => (
+                         collaborator.status === 'active' && ( // Redundante, mas seguro
                             <React.Fragment key={collaborator.id}>
                                 <ListItem
                                     secondaryAction={
-                                        <IconButton edge="end" aria-label="deactivate" onClick={() => handleDeactivate(collaborator.id)} title="Desativar">
-                                            <PersonOffIcon color="error" />
-                                        </IconButton>
+                                        <Tooltip title="Desativar Colaborador">
+                                            <IconButton edge="end" aria-label="deactivate" onClick={() => handleDeactivate(collaborator.id)}>
+                                                <PersonOffIcon color="error" />
+                                            </IconButton>
+                                        </Tooltip>
                                     }
                                 >
-                                    <ListItemText 
+                                    <ListItemText
                                         primary={`${collaborator.first_name} ${collaborator.last_name}`}
                                         secondary={collaborator.email}
                                     />
                                 </ListItem>
-                                {index < collaborators.length - 1 && <Divider />}
+                                {/* Adiciona Divider apenas se não for o último item *visível* */}
+                                {index < collaborators.filter(c => c.status === 'active').length - 1 && <Divider component="li" />}
                             </React.Fragment>
                         )
-                    ))}
+                    ))
+                   ) : (
+                    // Mensagem se a lista filtrada estiver vazia
+                    <ListItem>
+                        <ListItemText primary="Nenhum colaborador ativo encontrado." sx={{ textAlign: 'center', color: 'text.secondary' }}/>
+                    </ListItem>
+                   )}
                 </List>
             </Paper>
 
@@ -271,16 +323,16 @@ const CompanyAdminDashboard = () => {
                             {yearOptions.map(year => (<MenuItem key={year} value={year}>{year}</MenuItem>))}
                         </Select>
                     </FormControl>
-                    <Button 
-                        variant="outlined" 
-                        onClick={handleDownload} 
+                    <Button
+                        variant="outlined"
+                        onClick={handleDownload}
                         disabled={accessReport.length === 0}
                         startIcon={<DownloadIcon />}
                     >
                         Baixar (CSV)
                     </Button>
                 </Box>
-                
+
                 {loading ? <Typography>Carregando relatório...</Typography> : (
                     accessReport.length > 0 ? (
                         <>
