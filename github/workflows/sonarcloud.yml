@@ -31,9 +31,16 @@ jobs:
       - name: Install Frontend Dependencies
         run: npm install --prefix frontend
 
-      # (Opcional) Executar testes e gerar relatório de cobertura aqui, se configurado
-      # - name: Run Frontend Tests & Coverage
-      #   run: npm test --prefix frontend -- --coverage
+     # --- ETAPAS DE TESTE ADICIONADAS ---
+      - name: Run Backend Tests & Coverage
+        # O '--' extra passa o flag '--coverage' para o script 'jest'
+        run: npm test --prefix backend -- --coverage 
+        
+      - name: Run Frontend Tests & Coverage
+        # Usamos o script 'coverage' que criamos no package.json do frontend
+        run: npm run coverage --prefix frontend
+
+      # --- FIM DAS ETAPAS DE TESTE ---
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
