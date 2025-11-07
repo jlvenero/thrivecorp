@@ -1,28 +1,22 @@
-// backend/controllers/authController.test.js
-
 const authController = require('./authController');
 const authService = require('../services/authService');
 
-// Simula o authService
 jest.mock('../services/authService');
 
 describe('Auth Controller - Login', () => {
 
     it('deve retornar 200 e um token para credenciais válidas', async () => {
-        // Prepara os mocks
         const mockToken = { token: 'fake-jwt-token', user: { id: 1, role: 'company_admin' } };
         authService.validateCredentialsAndGenerateToken.mockResolvedValue(mockToken);
 
-        // Prepara objetos mockados de req (requisição) e res (resposta)
         const req = {
             body: {
                 email: 'test@company.com',
                 password: 'password123'
             }
         };
-        // Mock das funções de resposta do Express
         const res = {
-            status: jest.fn(() => res), // Permite encadeamento (res.status(200).json(...))
+            status: jest.fn(() => res),
             json: jest.fn()
         };
 
