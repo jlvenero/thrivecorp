@@ -1,5 +1,3 @@
-// src/pages/AdminAprovarAcademias/index.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -9,8 +7,9 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'; // Ícone para o título da página
-import ConfirmationDialog from '../../components/ConfirmationDialog'; // Nosso modal reutilizável!
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
+import { API_URL } from '../../apiConfig'
 
 // Componente para o status (reutilizado da outra tela)
 const StatusChip = ({ status }) => {
@@ -57,7 +56,7 @@ const AdminAprovarAcademias = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/gyms/all', {
+            const response = await axios.get(`${API_URL}/api/gyms/all`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGyms(response.data);
@@ -76,7 +75,7 @@ const AdminAprovarAcademias = () => {
         setDialogOpen(false);
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:3000/api/gyms/${gymId}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.put(`${API_URL}/api/gyms/${gymId}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
             fetchGyms();
         } catch (err) { setError('Falha ao aprovar a academia.'); }
     };
@@ -85,7 +84,7 @@ const AdminAprovarAcademias = () => {
         setDialogOpen(false);
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:3000/api/gyms/${gymId}/reprove`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`h${API_URL}/api/gyms/${gymId}/reprove`, { headers: { Authorization: `Bearer ${token}` } });
             fetchGyms();
         } catch (err) { setError('Falha ao reprovar a academia.'); }
     };

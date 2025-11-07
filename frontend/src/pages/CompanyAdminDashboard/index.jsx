@@ -11,6 +11,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import PersonOffIcon from '@mui/icons-material/PersonOff';
 import DownloadIcon from '@mui/icons-material/Download'; // <-- Importado Ícone de Download
 import './CompanyAdminDashboard.css';
+import { API_URL } from '../../apiConfig'
 
 // Estilo para o Modal
 const modalStyle = {
@@ -60,7 +61,7 @@ const CompanyAdminDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const headers = { headers: { Authorization: `Bearer ${token}` } };
-            const collaboratorsResponse = await axios.get('http://localhost:3000/api/company/collaborators', headers);
+            const collaboratorsResponse = await axios.get(`${API_URL}/api/company/collaborators`, headers);
             setCollaborators(collaboratorsResponse.data);
         } catch (err) {
             setError('Falha ao buscar a lista de colaboradores.');
@@ -73,7 +74,7 @@ const CompanyAdminDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/accesses/company-details-report`, {
+            const response = await axios.get(`${API_URL}/api/accesses/company-details-report`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { year: selectedDate.year, month: selectedDate.month }
             });
@@ -109,7 +110,7 @@ const CompanyAdminDashboard = () => {
         setError('');
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3000/api/company/collaborators`, newCollaborator, {
+            await axios.post(`${API_URL}/api/company/collaborators`, newCollaborator, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             handleCloseModal();
@@ -123,7 +124,7 @@ const CompanyAdminDashboard = () => {
         if (window.confirm("Tem certeza que deseja desativar este colaborador?")) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.put(`http://localhost:3000/api/company/collaborators/${collaboratorId}/deactivate`, {}, {
+                await axios.put(`${API_URL}/api/company/collaborators/${collaboratorId}/deactivate`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 fetchCollaborators();
@@ -137,7 +138,7 @@ const CompanyAdminDashboard = () => {
         setError('');
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/accesses/download-company-report`, {
+            const response = await axios.get(`${API_URL}/api/accesses/download-company-report`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { year: selectedDate.year, month: selectedDate.month },
                 responseType: 'blob',
