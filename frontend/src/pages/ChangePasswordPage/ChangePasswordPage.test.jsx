@@ -68,7 +68,7 @@ describe('ChangePasswordPage', () => {
 
     // Verifica se o axios foi chamado corretamente
     expect(axios.put).toHaveBeenCalledWith(
-      'http://localhost:3000/api/auth/change-password', // A URL
+      `${API_URL}/api/auth/change-password`, // A URL
       { oldPassword: 'senhaAntiga123', newPassword: 'novaSenha123' }, // O body
       expect.anything() // O terceiro argumento (headers)
     );

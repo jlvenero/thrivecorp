@@ -11,6 +11,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import './ProviderDashboard.css';
+import { API_URL } from '../../apiConfig'
 
 // Estilo para o Modal
 const modalStyle = {
@@ -59,9 +60,9 @@ const ProviderDashboard = () => {
             const headers = { headers: { Authorization: `Bearer ${token}` } };
 
             const [gymsRes, reportRes, plansRes] = await Promise.all([
-                axios.get('http://localhost:3000/api/gyms', headers),
-                axios.get('http://localhost:3000/api/accesses/provider-report', headers),
-                axios.get('http://localhost:3000/api/plans', headers)
+                axios.get(`${API_URL}/api/gyms`, headers),
+                axios.get(`${API_URL}/api/accesses/provider-report`, headers),
+                axios.get(`${API_URL}/api/plans`, headers)
             ]);
 
             setGyms(gymsRes.data);
@@ -92,9 +93,9 @@ const ProviderDashboard = () => {
         const headers = { headers: { Authorization: `Bearer ${token}` } };
         try {
             if (isEditingGym) {
-                await axios.put(`http://localhost:3000/api/gyms/${gymForm.id}`, gymForm, headers);
+                await axios.put(`${API_URL}/api/gyms/${gymForm.id}`, gymForm, headers);
             } else {
-                await axios.post('http://localhost:3000/api/provider/gyms', gymForm, headers);
+                await axios.post(`${API_URL}/api/provider/gyms`, gymForm, headers);
             }
             handleCloseModal(); // Fecha o modal após o sucesso
             fetchAllData();
@@ -118,7 +119,7 @@ const ProviderDashboard = () => {
         if (window.confirm("Tem certeza que deseja deletar esta academia?")) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:3000/api/gyms/${gymId}`, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.delete(`${API_URL}/api/gyms/${gymId}`, { headers: { Authorization: `Bearer ${token}` } });
                 fetchAllData();
             } catch (err) {
                 setError('Falha ao deletar a academia.');
@@ -138,9 +139,9 @@ const ProviderDashboard = () => {
         const headers = { headers: { Authorization: `Bearer ${token}` } };
         try {
             if (isEditingPlan) {
-                await axios.put(`http://localhost:3000/api/plans/${planForm.id}`, planForm, headers);
+                await axios.put(`${API_URL}/api/plans/${planForm.id}`, planForm, headers);
             } else {
-                await axios.post('http://localhost:3000/api/plans', planForm, headers);
+                await axios.post(`${API_URL}/api/plans`, planForm, headers);
             }
             resetPlanForm();
             fetchAllData();
@@ -156,7 +157,7 @@ const ProviderDashboard = () => {
         if (window.confirm("Tem certeza que deseja deletar este plano?")) {
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`http://localhost:3000/api/plans/${planId}`, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.delete(`${API_URL}/api/plans/${planId}`, { headers: { Authorization: `Bearer ${token}` } });
                 fetchAllData();
             } catch (err) {
                 setError('Falha ao deletar o plano.');

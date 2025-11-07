@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../../apiConfig'
 
 // Importações do Material-UI
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -59,7 +60,7 @@ const RegisterPage = () => {
         }
 
         try {
-            await axios.post('http://localhost:3000/api/auth/register', formData);
+            await axios.post(`${API_URL}/api/auth/register`, formData);
             navigate('/pending-approval', { replace: true });
         } catch (err) {
             setError(err.response?.data?.error || 'Falha no registro. Tente novamente.');

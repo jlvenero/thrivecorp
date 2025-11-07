@@ -10,6 +10,7 @@ import DownloadIcon from '@mui/icons-material/Download';      // Ícone de Downl
 import MarkChatReadIcon from '@mui/icons-material/MarkChatRead'; // Ícone para Marcar como Faturado
 import MarkChatUnreadIcon from '@mui/icons-material/MarkChatUnread'; // Ícone para Marcar como Pendente
 import ConfirmationDialog from '../../components/ConfirmationDialog'; // Reutilizar o diálogo
+import { API_URL } from '../../apiConfig'
 
 // Componente StatusChip adaptado para esta tela
 const StatusChip = ({ status }) => {
@@ -60,7 +61,7 @@ const AdminBillingReport = () => {
         setError(null); // Limpa erro anterior
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3000/api/accesses/billing-report`, {
+            const response = await axios.get(`${API_URL}/api/accesses/billing-report`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { year: selectedDate.year, month: selectedDate.month }
             });
@@ -77,7 +78,7 @@ const AdminBillingReport = () => {
     const fetchCompanies = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/companies', {
+            const response = await axios.get(`${API_URL}/api/companies`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // Filtra apenas empresas ativas para o select
@@ -116,7 +117,7 @@ const AdminBillingReport = () => {
         try {
             const token = localStorage.getItem('token');
             // Chama a nova rota do backend
-            await axios.post('http://localhost:3000/api/admin/billing/status', {
+            await axios.post(`${API_URL}/api/admin/billing/status`, {
                 companyId,
                 year: selectedDate.year,
                 month: selectedDate.month,

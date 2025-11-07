@@ -12,6 +12,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import BusinessIcon from '@mui/icons-material/Business';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
+import { API_URL } from '../../apiConfig'
 
 // Componente StatusChip (sem alterações)
 const StatusChip = ({ status }) => {
@@ -56,7 +57,7 @@ const AdminAprovarEmpresas = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/companies', {
+            const response = await axios.get(`${API_URL}/api/companies`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCompanies(response.data);
@@ -76,7 +77,7 @@ const AdminAprovarEmpresas = () => {
         setDialogOpen(false); // Fecha o modal primeiro
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:3000/api/companies/${companyId}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.put(`${API_URL}/api/companies/${companyId}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
             fetchCompanies();
         } catch (err) { setError('Falha ao aprovar a empresa.'); }
     };
@@ -85,7 +86,7 @@ const AdminAprovarEmpresas = () => {
         setDialogOpen(false);
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:3000/api/companies/${companyId}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`${API_URL}/api/companies/${companyId}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchCompanies();
         } catch (err) { setError('Falha ao rejeitar a empresa.'); }
     };
@@ -94,7 +95,7 @@ const AdminAprovarEmpresas = () => {
         setDialogOpen(false);
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:3000/api/companies/${companyId}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`${API_URL}/api/companies/${companyId}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchCompanies();
         } catch (err) { setError('Falha ao excluir a empresa.'); }
     };

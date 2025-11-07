@@ -16,6 +16,7 @@ import {
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'; // Ícone para academias
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Ícone para check-in
 import ConfirmationDialog from '../../components/ConfirmationDialog'; // Reutilizar o diálogo de confirmação
+import { API_URL } from '../../apiConfig'
 
 const ColaboradorDashboard = () => {
     const [gyms, setGyms] = useState([]);
@@ -32,7 +33,7 @@ const ColaboradorDashboard = () => {
         setSuccessMessage(''); // Limpar mensagem de sucesso ao recarregar
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/collaborator/gyms', {
+            const response = await axios.get(`${API_URL}/api/collaborator/gyms`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // Filtrar academias ativas (se a API não fizer isso)
@@ -57,7 +58,7 @@ const ColaboradorDashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:3000/api/accesses',
+            await axios.post(`${API_URL}/api/accesses`,
                 { gymId: gymId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

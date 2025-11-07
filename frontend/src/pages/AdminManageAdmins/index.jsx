@@ -12,6 +12,7 @@ import {
     Divider
 } from '@mui/material';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { API_URL } from '../../apiConfig'
 
 const AdminManageAdmins = () => {
     const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', password: '' });
@@ -31,7 +32,7 @@ const AdminManageAdmins = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:3000/api/admin/admins', formData, {
+            await axios.post(`${API_URL}/api/admin/admins`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccess(`Administrador "${formData.first_name}" criado com sucesso!`);

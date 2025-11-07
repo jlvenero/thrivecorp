@@ -17,6 +17,7 @@ import {
 import LockResetIcon from '@mui/icons-material/LockReset';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { API_URL } from '../../apiConfig'
 
 const ChangePasswordPage = () => {
     const [formData, setFormData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
@@ -51,7 +52,7 @@ const ChangePasswordPage = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.put('http://localhost:3000/api/auth/change-password', {
+            await axios.put(`${API_URL}/api/auth/change-password`, {
                 oldPassword: formData.oldPassword,
                 newPassword: formData.newPassword
             }, {

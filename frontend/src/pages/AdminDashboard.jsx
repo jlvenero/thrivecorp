@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../apiConfig'
 
 const AdminDashboard = () => {
     const [companies, setCompanies] = useState([]);
@@ -11,7 +12,7 @@ const AdminDashboard = () => {
         setError(null);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/api/companies', {
+            const response = await axios.get(`${API_URL}/api/companies/api/companies`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -29,7 +30,7 @@ const AdminDashboard = () => {
     const handleApprove = async (companyId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:3000/api/companies/${companyId}/approve`, {}, {
+            await axios.put(`${API_URL}/api/companies/${companyId}/approve`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
