@@ -6,6 +6,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Configuração do banco
 const dbConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -13,11 +14,13 @@ const dbConfig = {
   database: process.env.DB_NAME,
 };
 
+// Middlewares
 app.use(express.json());
 
+// Configuração do CORS
 const allowedOrigins = [
   'https://thrivecorp-r6wc0vh6o-jlveneros-projects.vercel.app',
-  'http://localhost:5173', // para testes locais
+  'http://localhost:5173', // ambiente local
 ];
 
 const corsOptions = {
@@ -33,18 +36,20 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Conexão com o banco
 async function testDbConnection() {
   try {
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Conexão com o banco de dados estabelecida!');
+    console.log('✅ Conexão com o banco de dados estabelecida!');
     connection.end();
   } catch (error) {
-    console.error('Erro na conexão com o banco de dados:', error.message);
+    console.error('❌ Erro na conexão com o banco de dados:', error.message);
   }
 }
 
 testDbConnection();
 
+// Import das rotas
 const authRoutes = require('./routes/auth');
 const companiesRoutes = require('./routes/companies');
 const collaboratorsRoutes = require('./routes/collaborators');
@@ -54,6 +59,7 @@ const profileRoutes = require('./routes/profile');
 const providersRoutes = require('./routes/providers');
 const adminRoutes = require('./routes/admin');
 
+// Registro das rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/company', collaboratorsRoutes);
@@ -63,10 +69,12 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', providersRoutes);
 
+// Rota raiz
 app.get('/', (req, res) => {
-  res.send('API ThriveCorp está funcionando!');
+  res.send('🚀 API ThriveCorp está funcionando!');
 });
 
+// Inicializa o servidor
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+  console.log(`Servidor rodando em http://localhost:${port}`);
 });
