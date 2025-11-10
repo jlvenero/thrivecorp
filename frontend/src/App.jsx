@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme';
 import CssBaseline from '@mui/material/CssBaseline';
+import { API_URL } from './apiConfig';
 
 import LoginPage from './pages/LoginPage/index';
 import RegisterPage from './pages/RegisterPage/index';
@@ -48,6 +49,7 @@ const DefaultDashboard = () => {
 };
 
 function App() {
+    console.log('API_URL em uso:', API_URL);
     const navigate = useNavigate();
     const handleLogout = () => {
         localStorage.removeItem('token');

@@ -19,8 +19,8 @@ app.use(express.json());
 
 // Configuração do CORS
 const allowedOrigins = [
-  'https://thrivecorp-r6wc0vh6o-jlveneros-projects.vercel.app',
-  'http://localhost:5173', // ambiente local
+  process.env.FRONTEND_URL, // Vem do .env no Railway
+  'http://localhost:5173'
 ];
 
 const corsOptions = {
