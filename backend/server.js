@@ -19,8 +19,9 @@ app.use(express.json());
 
 // Configuração do CORS
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // Vem do .env no Railway
-  'http://localhost:5173'
+  'https://thrivecorp.vercel.app', // seu domínio principal
+  'https://thrivecorp-r6wc0vh6o-jlveneros-projects.vercel.app', // domínio temporário do preview
+  'http://localhost:5173', // ambiente local
 ];
 
 const corsOptions = {
@@ -31,10 +32,15 @@ const corsOptions = {
       callback(new Error('Não permitido pela política de CORS'));
     }
   },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));// 👈 ESSENCIAL: habilita o preflight
+app.use(express.json());
+
 
 // Conexão com o banco
 async function testDbConnection() {
