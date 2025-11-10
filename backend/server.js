@@ -14,7 +14,28 @@ const dbConfig = {
 };
 
 app.use(express.json());
-app.use(cors());
+const allowedOrigins = [
+  'https://thrivecorp-r6wc0vh6o-jlveneros-projects.vercel.app',
+  'http://localhost:5173' // Adicione seu local para testes
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Não permitido pela política de CORS'));
+    }
+  },
+  optionsSuccessStatus: 200 // Responde OK (200) para requisições OPTIONS
+};
+
+// 2. Habilita o pre-flight (OPTIONS) para TODAS as rotas
+// Isso corrige o seu erro 404
+app.options('*', cors(corsOptions));
+
+// 3. Aplica as regras de CORS para todas as outras requisições (GET, POST, etc.)
+app.use(cors(corsOptions));
 
 // Função para testar a conexão com o banco de dados
 async function testDbConnection() {
