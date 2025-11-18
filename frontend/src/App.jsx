@@ -19,7 +19,6 @@ import ProviderDashboard from './pages/ProviderDashboard';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 import ColaboradorDashboard from './pages/ColaboradorDashboard'; // Importado aqui
 import { Box, Typography } from '@mui/material'; // Importar Box e Typography para a tela padrão
-// teste
 // Componente para decidir qual Dashboard mostrar
 const DefaultDashboard = () => {
     const userRole = localStorage.getItem('userRole');

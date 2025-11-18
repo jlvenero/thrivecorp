@@ -2,30 +2,37 @@ name: Deploy Backend to Elastic Beanstalk
 
 on:
   push:
-    branches: [ main ] # Roda quando houver push na branch 'main'
+    branches: [ main ] # Roda na sua branch 'main'
     paths:
-      - 'backend/**'  # ⚠️ Só roda se houver mudanças na pasta 'backend'
+      - 'backend/**' # Só roda se mudar a pasta 'backend'
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Usa uma máquina virtual Linux
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+
+      - name: Checkout source code
         uses: actions/checkout@v4 # Baixa o seu código
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2 # ⚠️ Ohio! Mude se sua região for outra
+      # Esta etapa cria o .zip APENAS com o conteúdo do backend
+      - name: Generate deployment package
+        run: |
+          cd backend # Entra na pasta do backend
+          zip -r ../deploy-backend.zip . -x '*.git*'
+          cd .. # Volta para a raiz
 
-      # Este action zipa o 'directory_path' e envia para o EB
-      - name: Deploy to Elastic Beanstalk
-        uses: einare/action-beanstalk-deploy@v20
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v22 # 👈 A ACTION CORRETA QUE VOCÊ ACHOU
         with:
-          application_name: thriveCorp2 # ✏️ MUDE: Nome da sua *Aplicação* no EB
-          environment_name: ThriveCorp2-env # ✏️ MUDE: Nome do seu *Ambiente* no EB
-          version_label: "v${{ github.sha }}" # Cria um nome de versão único
-          region: us-east-2 # ⚠️ Ohio!
-          directory_path: backend # ⚠️ A pasta que contém o código do seu backend
+          # Segredos da AWS
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
+          # Nomes do seu ambiente
+          application_name: thrivecorp # ✏️ MUDE (se for diferente)
+          environment_name: Thrivecorp-env # ✏️ MUDE (se for diferente)
+          region: us-east-2 # ✏️ MUDE (Ohio é us-east-2)
+
+          # O pacote de deploy
+          version_label: "v-${{ github.sha }}" # Um nome de versão único
+          deployment_package: deploy-backend.zip # O zip que criamos acima

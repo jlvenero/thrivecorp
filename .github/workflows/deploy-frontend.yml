@@ -37,7 +37,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./frontend/build s3://thrivecorp-frontend-app-2003 --delete # ✏️ MUDE para o nome do seu Bucket S3
+          aws s3 sync ./frontend/dist s3://thrivecorp-frontend-app-2003 --delete # ✏️ MUDE para o nome do seu Bucket S3
 
       - name: Invalidate CloudFront Cache
         run: |
