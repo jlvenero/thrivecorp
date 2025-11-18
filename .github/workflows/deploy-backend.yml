@@ -21,14 +21,17 @@ jobs:
           # Garante que o Procfile exista
           echo "web: node server.js" > Procfile
 
-          # Cria o ZIP corretamente e com nome correto
+          # Instala dependências para produção
+          npm install --production
+
+          # Cria o ZIP completo para deploy
           zip -r ../deploy-backend.zip . \
             -x "*.git*" \
-            -x "node_modules/*" \
             -x ".github/*" \
             -x "*.log" \
             -x "README.md" \
-            -x "tests/*"
+            -x "tests/*" \
+            -x "*.md"
 
           cd ..
 
