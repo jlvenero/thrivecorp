@@ -14,25 +14,28 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
       - name: Prepare deployment package
         run: |
           cd backend
 
-          # Garante que o Procfile exista
+          # Garante Procfile
           echo "web: node server.js" > Procfile
 
-          # Instala dependências para produção
-          npm install --production
+          # Remove node_modules — ESSENCIAL
+          rm -rf node_modules
 
-          # Cria o ZIP completo para deploy
-          zip -r ../deploy-backend.zip . \
-            -x "*.git*" \
-            -x ".github/*" \
-            -x "*.log" \
-            -x "README.md" \
-            -x "tests/*" \
-            -x "*.md"
+          # instala dependências sem dev
+          npm install --omit=dev
 
+          # agora sim zipa sem peso extra
+          zip -r ../deploy-backend.zip . -x '*.git*' -x 'node_modules/*' # 👈 VERSÃO CORRIGIDA
           cd ..
 
       - name: Deploy to Elastic Beanstalk
