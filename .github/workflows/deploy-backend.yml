@@ -7,19 +7,28 @@ on:
       - 'backend/**'
 
 jobs:
-  build-and-deploy:
-    runs-on: [ ubuntu-latest ]
+  deploy: # O nome do job era 'build-and-deploy', mudei para 'deploy' para corresponder ao seu antigo ficheiro
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source
+      - name: Checkout source code
         uses: actions/checkout@v4
-      - name: Setup Node
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - name: Install Dependencies
-        run: npm install
-      - name: Genrate Deployment Package
-        run: zip -r deploy.zip * -x "**node_modules**"
+          node-version: '22' # 1. Alinhado com a versão do seu EB
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Generate deployment package
+        run: |
+          cd backend # 2. Entra na pasta correta
+          npm install --production # 3. Instala dependências de produção (usando Node 22)
+          # 4. Zipa o conteúdo da pasta 'backend' (incluindo node_modules)
+          # O zip é guardado na pasta anterior (a raiz)
+          zip -r ../deploy-backend.zip . -x '*.git*' 
+          cd ..
+
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
@@ -27,9 +36,6 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: thriveCorp2
           environment_name: ThriveCorp2-env
-          version_label: ${{ github.sha }}
           region: us-east-2
-          deployment_package: nodejs-app-build.zip
-
-
-          
+          version_label: "v-${{ github.sha }}" # Um nome de versão único
+          deployment_package: deploy-backend.zip # 5. O nome correto do ficheiro zip
