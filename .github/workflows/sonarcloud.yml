@@ -48,3 +48,6 @@ jobs:
         env:
           # O token é suficiente para autenticação
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+        with:
+          # FORÇA A PROPRIEDADE DA ORGANIZAÇÃO PARA RESOLVER O ERRO DE PERFIL
+          args: -Dsonar.organization=jlvenero 
