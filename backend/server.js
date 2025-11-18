@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 8080;
-
+//teste
 // Configuração do banco
 const dbConfig = {
   host: process.env.DB_HOST,

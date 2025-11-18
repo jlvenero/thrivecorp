@@ -18,7 +18,8 @@ jobs:
       - name: Generate deployment package
         run: |
           cd backend # Entra na pasta do backend
-          zip -r ../deploy-backend.zip . -x '*.git*' -x 'node_modules/*' # 👈 VERSÃO CORRIGIDA
+          npm install --production # 👈 ADICIONE ESTA LINHA
+          zip -r ../deploy-backend.zip . -x '*.git*' # 👈 LINHA MODIFICADA
           cd ..
 
       - name: Deploy to EB
