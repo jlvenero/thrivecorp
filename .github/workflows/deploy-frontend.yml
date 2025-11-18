@@ -44,6 +44,12 @@ jobs:
 
           aws cloudfront create-invalidation \
             --distribution-id E1JU7I21UE3FMM \
-            --paths "/*" \
-            --caller-reference "$CALLER_REF"
+            --invalidation-batch "{
+              \"Paths\": {
+                \"Quantity\": 1,
+                \"Items\": [\"/*\"]
+              },
+              \"CallerReference\": \"$CALLER_REF\"
+            }"
+
          
