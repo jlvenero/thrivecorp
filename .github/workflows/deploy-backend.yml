@@ -7,46 +7,29 @@ on:
       - 'backend/**'
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: [ ubuntu-latest ]
     steps:
-
-      - name: Checkout source code
+      - name: Checkout Source
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Prepare deployment package
-        run: |
-          cd backend
-
-          # Garante Procfile
-          echo "web: node server.js" > Procfile
-
-          # Remove node_modules — ESSENCIAL
-          rm -rf node_modules
-
-          # instala dependências sem dev
-          npm install --omit=dev
-
-          # agora sim zipa sem peso extra
-          zip -r ../deploy-backend.zip . -x '*.git*' -x 'node_modules/*' # 👈 VERSÃO CORRIGIDA
-          cd ..
-
-      - name: Deploy to Elastic Beanstalk
+          node-version: 22
+      - name: Install Dependencies
+        run: npm install
+      - name: Genrate Deployment Package
+        run: zip -r deploy.zip * -x "**node_modules**"
+      - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
           application_name: thriveCorp2
           environment_name: ThriveCorp2-env
+          version_label: ${{ github.sha }}
           region: us-east-2
+          deployment_package: nodejs-app-build.zip
 
-          version_label: "v-${{ github.sha }}"
-          deployment_package: deploy-backend.zip
+
+          

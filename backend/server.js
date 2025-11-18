@@ -12,7 +12,7 @@ const dbConfig = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 };
-
+//teste
 // Middlewares
 app.use(express.json());
 
