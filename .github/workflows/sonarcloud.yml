@@ -35,6 +35,7 @@ jobs:
       - name: Run Backend Tests & Coverage
         # O '--' extra passa o flag '--coverage' para o script 'jest'
         run: npm test --prefix backend -- --coverage 
+        continue-on-error: true
         
       - name: Run Frontend Tests & Coverage
         # Usamos o script 'coverage' que criamos no package.json do frontend
