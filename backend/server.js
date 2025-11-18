@@ -42,7 +42,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));// 👈 ESSENCIAL: habilita o preflight
 app.use(express.json());
-
+//teste
 // Conexão com o banco
 async function testDbConnection() {
   try {

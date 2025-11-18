@@ -29,8 +29,8 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           
           # Nomes do seu ambiente
-          application_name: thrivecorp # ✏️ MUDE (se for diferente)
-          environment_name: Thrivecorp-env # ✏️ MUDE (se for diferente)
+          application_name: thriveCorp2 # ✏️ MUDE (se for diferente)
+          environment_name: ThriveCorp2-env # ✏️ MUDE (se for diferente)
           region: us-east-2 # ✏️ MUDE (Ohio é us-east-2)
 
           # O pacote de deploy

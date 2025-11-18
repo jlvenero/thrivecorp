@@ -38,9 +38,11 @@ jobs:
       - name: Deploy to S3
         run: |
           aws s3 sync ./frontend/dist s3://thrivecorp-frontend-app-2003 --delete # ✏️ MUDE para o nome do seu Bucket S3
-
       - name: Invalidate CloudFront Cache
         run: |
+          # O AWS CLI espera um "CallerReference" único para cada invalidação
+          CALLER_REF=$(date +%s) # Usamos o timestamp atual como referência única
+          
           aws cloudfront create-invalidation \
-            --distribution-id E1JU7I21UE3FMM # ✏️ MUDE para o ID da sua Distribuição CloudFront
-            --paths "/*"
+            --distribution-id E1JU7I21UE3FMM # ✏️ MUDE para o ID da sua Distribuição
+            --invalidation-batch "{ \"Paths\": { \"Quantity\": 1, \"Items\": [\"/*\"] }, \"CallerReference\": \"$CALLER_REF\" }"

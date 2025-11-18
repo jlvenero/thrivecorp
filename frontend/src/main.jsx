@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom'; // Importe o BrowserRouter aqui
-
+//teste
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     {/* O App agora é um filho do BrowserRouter */}
