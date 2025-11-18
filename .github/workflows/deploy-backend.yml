@@ -18,8 +18,15 @@ jobs:
       - name: Generate deployment package
         run: |
           cd backend # Entra na pasta do backend
-          zip -r ../deploy-backend.zip . -x '*.git*'
-          cd .. # Volta para a raiz
+          zip -r ../deploy-backend.zip . \
+            -x "*.git*" \
+            -x "node_modules/*" \
+            -x "*.log" \
+            -x "tests/*" \
+            -x "coverage/*" \
+            -x ".env" \
+            -x ".vscode/*"
+          cd ..
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22 # 👈 A ACTION CORRETA QUE VOCÊ ACHOU

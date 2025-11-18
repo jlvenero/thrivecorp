@@ -1,0 +1,21 @@
+# Não enviar node_modules
+node_modules/
+
+# Ignore arquivos de testes
+tests/
+coverage/
+*.test.js
+
+# Ignore arquivos locais
+.env
+*.log
+
+# Ignore IDE
+.vscode/
+.idea/
+
+# Outros
+.git/
+.gitignore
+Dockerfile
+README.md
