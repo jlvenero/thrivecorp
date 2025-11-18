@@ -22,9 +22,10 @@ const allowedOrigins = [
   'https://thrivecorp.vercel.app', // seu domínio principal
   'https://thrivecorp-r6wc0vh6o-jlveneros-projects.vercel.app', // domínio temporário do preview
   'http://localhost:5173',
-  'https://api.thrivecorp.click' // ambiente local
+  'https://api.thrivecorp.click',
+  'https://thrivecorp.click', // ambiente local
 ];
-
+//teste
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
