@@ -24,8 +24,8 @@ jobs:
       - name: Deploy to Elastic Beanstalk
         uses: einare/action-beanstalk-deploy@v20
         with:
-          application_name: thrivecorp # ✏️ MUDE: Nome da sua *Aplicação* no EB
-          environment_name: Thrivecorp-env # ✏️ MUDE: Nome do seu *Ambiente* no EB
+          application_name: thriveCorp2 # ✏️ MUDE: Nome da sua *Aplicação* no EB
+          environment_name: ThriveCorp2-env # ✏️ MUDE: Nome do seu *Ambiente* no EB
           version_label: "v${{ github.sha }}" # Cria um nome de versão único
           region: us-east-2 # ⚠️ Ohio!
           directory_path: backend # ⚠️ A pasta que contém o código do seu backend
