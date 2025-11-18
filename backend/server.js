@@ -48,7 +48,7 @@ app.use(express.json());
 async function testDbConnection() {
   try {
     const connection = await mysql.createConnection(dbConfig);
-    console.log('✅ Conexão com o banco de dados estabelecida com sucesso!');
+    console.log('✅ Conexão com o banco de dados estabelecida!');
     connection.end();
   } catch (error) {
     console.error('❌ Erro na conexão com o banco de dados:', error.message);
