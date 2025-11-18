@@ -88,7 +88,7 @@ const LoginPage = () => {
             ThriveCorp
           </Typography>
           <Typography component="p" sx={{ color: 'text.secondary', mb: 4 }}>
-            Entre na sua conta pau no cu do satanas
+            Entre na sua conta
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>

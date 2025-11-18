@@ -23,11 +23,11 @@ describe('ChangePasswordPage', () => {
   it('deve renderizar todos os campos do formulário', () => {
     renderComponent();
     
-    // Verifica se o título e os campos estão na tela
+// Agora usa RegEx para compatibilidade com MUI/asteriscos
     expect(screen.getByRole('heading', { name: /Alterar Senha/i })).toBeInTheDocument();
-    expect(screen.getByLabelText('Senha Atual')).toBeInTheDocument();
-    expect(screen.getByLabelText('Nova Senha')).toBeInTheDocument();
-    expect(screen.getByLabelText('Confirme a Nova Senha')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Senha Atual/i)).toBeInTheDocument(); // <-- CORRIGIDO
+    expect(screen.getByLabelText(/Nova Senha/i)).toBeInTheDocument(); // <-- CORRIGIDO
+    expect(screen.getByLabelText(/Confirme a Nova Senha/i)).toBeInTheDocument(); // <-- CORRIGIDO
     expect(screen.getByRole('button', { name: 'Alterar Senha' })).toBeInTheDocument();
   });
 
@@ -35,10 +35,9 @@ describe('ChangePasswordPage', () => {
     renderComponent();
 
     // Simula a digitação do usuário
-    fireEvent.change(screen.getByLabelText('Senha Atual'), { target: { value: 'senhaAntiga123' } });
-    fireEvent.change(screen.getByLabelText('Nova Senha'), { target: { value: 'novaSenha' } });
-    fireEvent.change(screen.getByLabelText('Confirme a Nova Senha'), { target: { value: 'senhaDiferente' } });
-
+    fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'senhaAntiga123' } }); // <-- CORRIGIDO
+    fireEvent.change(screen.getByLabelText(/Nova Senha/i), { target: { value: 'novaSenha' } }); // <-- CORRIGIDO
+    fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'senhaDiferente' } }); // <-- CORRIGIDO
     // Simula o clique no botão
     fireEvent.click(screen.getByRole('button', { name: 'Alterar Senha' }));
 
@@ -55,10 +54,10 @@ describe('ChangePasswordPage', () => {
     renderComponent();
 
     // Simula a digitação correta
-    fireEvent.change(screen.getByLabelText('Senha Atual'), { target: { value: 'senhaAntiga123' } });
-    fireEvent.change(screen.getByLabelText('Nova Senha'), { target: { value: 'novaSenha123' } });
-    fireEvent.change(screen.getByLabelText('Confirme a Nova Senha'), { target: { value: 'novaSenha123' } });
-
+    fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'senhaAntiga123' } }); // <-- CORRIGIDO
+    fireEvent.change(screen.getByLabelText(/Nova Senha/i), { target: { value: 'novaSenha123' } }); // <-- CORRIGIDO
+    fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'novaSenha123' } }); // <-- CORRIGIDO
+    
     // Simula o clique
     fireEvent.click(screen.getByRole('button', { name: 'Alterar Senha' }));
 
