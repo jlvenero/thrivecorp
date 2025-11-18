@@ -50,5 +50,10 @@ jobs:
           # O token é suficiente para autenticação
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
         with:
-          # FORÇA A PROPRIEDADE DA ORGANIZAÇÃO PARA RESOLVER O ERRO DE PERFIL
-          args: -Dsonar.organization=jlvenero 
+          # FORÇA as propriedades críticas via argumentos explícitos.
+          args: >
+            -Dsonar.organization=jlvenero
+            -Dsonar.projectKey=jlvenero_thrivecorp
+            -Dsonar.sources=backend,frontend/src
+            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx,**/node_modules/**,**/dist/**,**/*.config.js,**/jest.config.js,**/vite.config.js,**/*.test.js
+            -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info
