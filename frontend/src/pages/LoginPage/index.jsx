@@ -13,7 +13,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4B0082', // Roxo Profundo (Inovação)
+      main: '#4B0082', // Roxo Profundo (Inovação) 4B0082
     },
     secondary: {
       main: '#98FF98', // Verde Menta (Vitalidade)
@@ -88,7 +88,7 @@ const LoginPage = () => {
             ThriveCorp
           </Typography>
           <Typography component="p" sx={{ color: 'text.secondary', mb: 4 }}>
-            Entre na sua conta
+            Entre na sua conta pau no cu do satanas
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
