@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 // Configuração do banco
 const dbConfig = {
@@ -19,9 +19,11 @@ app.use(express.json());
 
 // Configuração do CORS
 const allowedOrigins = [
+  'https://d23y0llbzt72049.cloudfront.net',
   'https://thrivecorp.vercel.app', // seu domínio principal
   'https://thrivecorp-r6wc0vh6o-jlveneros-projects.vercel.app', // domínio temporário do preview
-  'http://localhost:5173', // ambiente local
+  'http://localhost:5173',
+  'https://api.thrivecorp.click' // ambiente local
 ];
 
 const corsOptions = {

@@ -1,0 +1,31 @@
+name: Deploy Backend to Elastic Beanstalk
+
+on:
+  push:
+    branches: [ main ] # Roda quando houver push na branch 'main'
+    paths:
+      - 'backend/**'  # ⚠️ Só roda se houver mudanças na pasta 'backend'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Usa uma máquina virtual Linux
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Baixa o seu código
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2 # ⚠️ Ohio! Mude se sua região for outra
+
+      # Este action zipa o 'directory_path' e envia para o EB
+      - name: Deploy to Elastic Beanstalk
+        uses: einare/action-beanstalk-deploy@v20
+        with:
+          application_name: thrivecorp # ✏️ MUDE: Nome da sua *Aplicação* no EB
+          environment_name: Thrivecorp-env # ✏️ MUDE: Nome do seu *Ambiente* no EB
+          version_label: "v${{ github.sha }}" # Cria um nome de versão único
+          region: us-east-2 # ⚠️ Ohio!
+          directory_path: backend # ⚠️ A pasta que contém o código do seu backend

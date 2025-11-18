@@ -1,0 +1,46 @@
+name: Deploy Frontend to S3 and CloudFront
+
+on:
+  push:
+    branches: [ main ] # Roda quando houver push na branch 'main'
+    paths:
+      - 'frontend/**' # ⚠️ Só roda se houver mudanças na pasta 'frontend'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Baixa o código
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # ✏️ Mude se você usa uma versão diferente
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install and Build
+        run: |
+          echo "Iniciando build do frontend..."
+          cd frontend # ⚠️ Entra na pasta do frontend
+          npm install
+          npm run build
+          echo "Build concluído."
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2 # ⚠️ Geralmente é 'us-east-1' ou a região do seu bucket S3
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./frontend/build s3://thrivecorp-frontend-app-2003 --delete # ✏️ MUDE para o nome do seu Bucket S3
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E1JU7I21UE3FMM # ✏️ MUDE para o ID da sua Distribuição CloudFront
+            --paths "/*"
