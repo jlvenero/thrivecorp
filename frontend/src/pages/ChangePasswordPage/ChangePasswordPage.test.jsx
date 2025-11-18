@@ -3,14 +3,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 import axios from 'axios';
 import ChangePasswordPage from './index';
-import { API_URL } from '../../apiConfig'; // CORREÇÃO 1: Adiciona API_URL
+import { API_URL } from '../../apiConfig'; // CORREÇÃO 1: Adiciona import da API_URL
 
 // Simula a biblioteca 'axios'
 vi.mock('axios');
 
 describe('ChangePasswordPage', () => {
 
-  // Melhora a estabilidade limpando mocks após cada teste
+  // Limpa os mocks após cada teste para garantir isolamento
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -27,11 +27,11 @@ describe('ChangePasswordPage', () => {
   it('deve renderizar todos os campos do formulário', () => {
     renderComponent();
     
-    // Usando RegEx para compatibilidade com MUI/asteriscos
+    // As buscas usam RegEx para ignorar asteriscos do MUI.
+    // O campo "Nova Senha" usa âncora (^) para evitar colidir com "Confirme a Nova Senha".
     expect(screen.getByRole('heading', { name: /Alterar Senha/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Senha Atual/i)).toBeInTheDocument();
-    // CORREÇÃO 2: Usa âncora ^ (começo da string) para unificar a busca
-    expect(screen.getByLabelText(/^Nova Senha/i)).toBeInTheDocument(); 
+    expect(screen.getByLabelText(/Senha Atual/i)).toBeInTheDocument(); 
+    expect(screen.getByLabelText(/^Nova Senha/i)).toBeInTheDocument(); // CORREÇÃO 2: Âncora para unicidade
     expect(screen.getByLabelText(/Confirme a Nova Senha/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Alterar Senha' })).toBeInTheDocument();
   });
@@ -39,9 +39,9 @@ describe('ChangePasswordPage', () => {
   it('deve mostrar um erro se as novas senhas não coincidirem', async () => {
     renderComponent();
 
-    // Simula a digitação do usuário usando a nova RegEx
+    // Simula a digitação do usuário
     fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'senhaAntiga123' } });
-    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'novaSenha' } }); // CORREÇÃO 3
+    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'novaSenha' } }); // Usa âncora
     fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'senhaDiferente' } });
 
     // Simula o clique no botão
@@ -58,9 +58,9 @@ describe('ChangePasswordPage', () => {
 
     renderComponent();
 
-    // Simula a digitação correta usando a nova RegEx
+    // Simula a digitação correta
     fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'senhaAntiga123' } });
-    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'novaSenha123' } }); // CORREÇÃO 4
+    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'novaSenha123' } }); // Usa âncora
     fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'novaSenha123' } });
     
     // Simula o clique
@@ -72,7 +72,7 @@ describe('ChangePasswordPage', () => {
 
     // Verifica se o axios foi chamado corretamente
     expect(axios.put).toHaveBeenCalledWith(
-      `${API_URL}/api/auth/change-password`, // A URL
+      `${API_URL}/api/auth/change-password`, // A URL (agora importada)
       { oldPassword: 'senhaAntiga123', newPassword: 'novaSenha123' }, // O body
       expect.anything() // O terceiro argumento (headers)
     );
