@@ -42,7 +42,6 @@ jobs:
       - name: Run Frontend Tests & Coverage
         run: npm run coverage --prefix frontend
 
-      # --- CORREÇÃO CRÍTICA DE CAMINHOS (FIX PATHS) ---
       # O Jest/Vitest gera caminhos como "src/file.js". 
       # O Sonar na raiz precisa de "frontend/src/file.js".
       - name: Fix Coverage Paths
