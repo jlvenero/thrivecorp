@@ -5,11 +5,14 @@ async function login(req, res) {
     try {
         const result = await authService.validateCredentialsAndGenerateToken(email, password);
         if (!result) {
-            return res.status(401).json({ message: 'E-mail ou senha incorretos.' });
+            return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
         }
         res.status(200).json(result);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error.message === 'Conta pendente de aprovação ou inativa.') {
+            return res.status(403).json({ error: 'Sua conta ainda está em análise. Aguarde a aprovação do administrador.' });
+        }
+        res.status(500).json({ error: 'Erro interno no servidor ao tentar realizar o login.' });
     }
 }
 
@@ -56,6 +59,9 @@ async function submitRegistrationRequest(req, res) {
         res.status(201).json({ message: 'Registro enviado com sucesso! Aguarde a aprovação.', id: newUserId });
     } catch (error) {
         console.error("Erro no registro:", error);
+        if (error.message === 'E-mail já cadastrado.') {
+            return res.status(409).json({ error: 'Este e-mail já está cadastrado no sistema.' });
+        }
         res.status(500).json({ error: 'Erro ao processar o registro.' });
     }
 }

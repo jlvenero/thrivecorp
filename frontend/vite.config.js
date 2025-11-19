@@ -1,4 +1,3 @@
-// frontend/vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -6,13 +5,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   test: {
-    globals: true, // Permite usar 'describe', 'it', 'expect' sem importar
-    environment: 'jsdom',
-    setupFiles: './src/setupTests.js', // Arquivo de setup (vamos criar a seguir)
+    globals: true,
+    environment: 'happy-dom', 
+    setupFiles: './src/setupTests.js',
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'lcov'], // Importante: 'lcov' para o SonarCloud
-      reportsDirectory: './coverage' // Onde salvar os relatórios
+      reporter: ['text', 'lcov'],
+      reportsDirectory: './coverage'
     }
   }
 })
