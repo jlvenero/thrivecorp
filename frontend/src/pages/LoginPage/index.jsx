@@ -5,17 +5,15 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../../apiConfig'
 
-// Importações do Material-UI
-import { createTheme, ThemeProvider } from '@mui/material/styles'; // Adicionado
-import { Box, TextField, Button, Typography, Container, InputAdornment, IconButton, Alert, CssBaseline } from '@mui/material'; // Adicionado CssBaseline
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Box, TextField, Button, Typography, Container, InputAdornment, IconButton, Alert, CssBaseline } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// Tema Local: Definindo a cor principal AZUL
 const localTheme = createTheme({
   palette: {
     primary: {
-      main: '#1e293b', // AZUL ESCURO PADRÃO
+      main: '#1e293b',
     },
     secondary: {
       main: '#98FF98', 
@@ -61,8 +59,9 @@ const LoginPage = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userRole', response.data.user.role);
       navigate('/dashboard', { replace: true });
-    } catch (err) {
-      setError('Falha no login. Verifique o seu e-mail e senha.');
+   } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Falha no login. Verifique sua conexão e tente novamente.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
