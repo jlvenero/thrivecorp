@@ -3,9 +3,9 @@ name: SonarCloud Analysis
 on:
   push:
     branches:
-      - main # Analisa quando houver push na branch main
+      - main
   pull_request:
-    types: [opened, synchronize, reopened] # Analisa em Pull Requests
+    types: [opened, synchronize, reopened]
 
 jobs:
   sonarcloud:
@@ -14,46 +14,64 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Necessário para análise de PRs e blame do git
-          fetch-depth: 0
+          fetch-depth: 0 # Importante para o Sonar analisar o histórico do git
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use a versão do Node.js compatível com seu projeto
-          cache: 'npm' # Habilita cache para 'npm install'
-          cache-dependency-path: | # Especifica onde estão os package-lock.json
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
             backend/package-lock.json
             frontend/package-lock.json
 
-      # Instalar dependências para ambos os módulos (necessário para algumas análises)
+      # Instalação de dependências
       - name: Install Backend Dependencies
         run: npm install --prefix backend
+
       - name: Install Frontend Dependencies
         run: npm install --prefix frontend
 
-     # --- ETAPAS DE TESTE ADICIONADAS ---
+      # --- EXECUÇÃO DOS TESTES ---
+      
+      # Removido '-- --coverage' pois seu package.json já roda 'jest --coverage'
+      # Removido 'continue-on-error' para garantir que o relatório só suba se os testes passarem
       - name: Run Backend Tests & Coverage
-        # O '--' extra passa o flag '--coverage' para o script 'jest'
-        run: npm test --prefix backend -- --coverage 
-        continue-on-error: true
-        
+        run: npm test --prefix backend
+
       - name: Run Frontend Tests & Coverage
-        # Usamos o script 'coverage' que criamos no package.json do frontend
         run: npm run coverage --prefix frontend
 
-      # --- FIM DAS ETAPAS DE TESTE ---
+      # --- CORREÇÃO CRÍTICA DE CAMINHOS (FIX PATHS) ---
+      # O Jest/Vitest gera caminhos como "src/file.js". 
+      # O Sonar na raiz precisa de "frontend/src/file.js".
+      - name: Fix Coverage Paths
+        run: |
+          # Ajusta caminhos do Backend
+          if [ -f backend/coverage/lcov.info ]; then
+            sed -i 's|SF:|SF:backend/|g' backend/coverage/lcov.info
+            echo "Caminhos do Backend corrigidos."
+          else
+            echo "Backend lcov.info não encontrado. Verifique se os testes passaram."
+          fi
+
+          # Ajusta caminhos do Frontend
+          if [ -f frontend/coverage/lcov.info ]; then
+            sed -i 's|SF:|SF:frontend/|g' frontend/coverage/lcov.info
+            echo "Caminhos do Frontend corrigidos."
+          else
+            echo "Frontend lcov.info não encontrado. Verifique se os testes passaram."
+          fi
+      # --------------------------------------------------
 
       - name: SonarCloud Scan
-        # Usando a action recomendada
-        uses: SonarSource/sonarqube-scan-action@v5.0.0 
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
-          # O token é suficiente para autenticação
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          # FORÇA as propriedades críticas via argumentos explícitos.
           args: >
             -Dsonar.organization=jlvenero
             -Dsonar.projectKey=jlvenero_thrivecorp
             -Dsonar.sources=backend,frontend/src
-            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx,**/node_modules/**,**/dist/**,**/*.config.js,**/jest.config.js,**/vite.config.js,**/*.test.js
+            -Dsonar.exclusions=**/*.test.js,**/*.test.jsx,**/node_modules/**,**/dist/**,**/*.config.js,**/jest.config.js,**/vite.config.js,**/*.test.js,**/*.css
             -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info,frontend/coverage/lcov.info

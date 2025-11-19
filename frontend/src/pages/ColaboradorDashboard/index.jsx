@@ -11,7 +11,7 @@ import {
     Alert,
     CircularProgress,
     Divider,
-    useTheme // Import useTheme
+    useTheme
 } from '@mui/material';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'; // Ícone para academias
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Ícone para check-in
