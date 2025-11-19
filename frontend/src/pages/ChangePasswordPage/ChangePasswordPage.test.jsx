@@ -1,15 +1,19 @@
-// frontend/src/pages/ChangePasswordPage/ChangePasswordPage.test.jsx
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 import axios from 'axios';
 import ChangePasswordPage from './index';
+import { API_URL } from '../../apiConfig'; // CORREÇÃO 1: Adiciona import da API_URL
 
 // Simula a biblioteca 'axios'
 vi.mock('axios');
 
 describe('ChangePasswordPage', () => {
+
+  // Limpa os mocks após cada teste para garantir isolamento
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
   // Função helper para renderizar o componente
   const renderComponent = () => {
@@ -23,11 +27,12 @@ describe('ChangePasswordPage', () => {
   it('deve renderizar todos os campos do formulário', () => {
     renderComponent();
     
-    // Verifica se o título e os campos estão na tela
+    // As buscas usam RegEx para ignorar asteriscos do MUI.
+    // O campo "Nova Senha" usa âncora (^) para evitar colidir com "Confirme a Nova Senha".
     expect(screen.getByRole('heading', { name: /Alterar Senha/i })).toBeInTheDocument();
-    expect(screen.getByLabelText('Senha Atual')).toBeInTheDocument();
-    expect(screen.getByLabelText('Nova Senha')).toBeInTheDocument();
-    expect(screen.getByLabelText('Confirme a Nova Senha')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Senha Atual/i)).toBeInTheDocument(); 
+    expect(screen.getByLabelText(/^Nova Senha/i)).toBeInTheDocument(); // CORREÇÃO 2: Âncora para unicidade
+    expect(screen.getByLabelText(/Confirme a Nova Senha/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Alterar Senha' })).toBeInTheDocument();
   });
 
@@ -35,15 +40,14 @@ describe('ChangePasswordPage', () => {
     renderComponent();
 
     // Simula a digitação do usuário
-    fireEvent.change(screen.getByLabelText('Senha Atual'), { target: { value: 'senhaAntiga123' } });
-    fireEvent.change(screen.getByLabelText('Nova Senha'), { target: { value: 'novaSenha' } });
-    fireEvent.change(screen.getByLabelText('Confirme a Nova Senha'), { target: { value: 'senhaDiferente' } });
+    fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'senhaAntiga123' } });
+    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'novaSenha' } }); // Usa âncora
+    fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'senhaDiferente' } });
 
     // Simula o clique no botão
     fireEvent.click(screen.getByRole('button', { name: 'Alterar Senha' }));
 
     // Espera (await) o componente atualizar e mostrar a mensagem de erro
-    // Usamos 'findByText' porque ele espera o elemento aparecer
     const errorMessage = await screen.findByText('A nova senha e a confirmação não coincidem.');
     expect(errorMessage).toBeInTheDocument();
   });
@@ -55,10 +59,10 @@ describe('ChangePasswordPage', () => {
     renderComponent();
 
     // Simula a digitação correta
-    fireEvent.change(screen.getByLabelText('Senha Atual'), { target: { value: 'senhaAntiga123' } });
-    fireEvent.change(screen.getByLabelText('Nova Senha'), { target: { value: 'novaSenha123' } });
-    fireEvent.change(screen.getByLabelText('Confirme a Nova Senha'), { target: { value: 'novaSenha123' } });
-
+    fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'senhaAntiga123' } });
+    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'novaSenha123' } }); // Usa âncora
+    fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'novaSenha123' } });
+    
     // Simula o clique
     fireEvent.click(screen.getByRole('button', { name: 'Alterar Senha' }));
 
@@ -68,7 +72,7 @@ describe('ChangePasswordPage', () => {
 
     // Verifica se o axios foi chamado corretamente
     expect(axios.put).toHaveBeenCalledWith(
-      `${API_URL}/api/auth/change-password`, // A URL
+      `${API_URL}/api/auth/change-password`, // A URL (agora importada)
       { oldPassword: 'senhaAntiga123', newPassword: 'novaSenha123' }, // O body
       expect.anything() // O terceiro argumento (headers)
     );
