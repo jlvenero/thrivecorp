@@ -1,35 +1,37 @@
+// frontend/src/pages/LoginPage/index.jsx
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../../apiConfig'
 
-// Importações do Material-UI para o tema
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Box, TextField, Button, Typography, Container, InputAdornment, IconButton, Alert, CssBaseline } from '@mui/material';
+// Importações do Material-UI
+import { createTheme, ThemeProvider } from '@mui/material/styles'; // Adicionado
+import { Box, TextField, Button, Typography, Container, InputAdornment, IconButton, Alert, CssBaseline } from '@mui/material'; // Adicionado CssBaseline
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// 1. Definição do tema com a paleta "Inovação e Equilíbrio"
-const theme = createTheme({
+// Tema Local: Definindo a cor principal AZUL
+const localTheme = createTheme({
   palette: {
     primary: {
-      main: '#4B0082', // Roxo Profundo (Inovação) 4B0082
+      main: '#1e293b', // AZUL ESCURO PADRÃO
     },
     secondary: {
-      main: '#98FF98', // Verde Menta (Vitalidade)
+      main: '#98FF98', 
     },
     text: {
-      primary: '#212529', // Cinza Escuro para textos principais
-      secondary: '#6c757d', // Cinza médio para textos secundários
+      primary: '#212529', 
+      secondary: '#6c757d', 
     },
     background: {
-      default: '#FFFFFF', // Fundo branco e limpo
+      default: '#FFFFFF',
     },
   },
   typography: {
-    fontFamily: 'Roboto, Arial, sans-serif', // Mantém uma fonte legível
+    fontFamily: 'Roboto, Arial, sans-serif',
     button: {
-      textTransform: 'none', // Remove o uppercase padrão dos botões
+      textTransform: 'none',
       fontWeight: 'bold',
     },
   },
@@ -70,11 +72,10 @@ const LoginPage = () => {
   const handleMouseDownPassword = (event) => event.preventDefault();
 
   return (
-    // 2. Aplicando o tema a todos os componentes filhos
-    <ThemeProvider theme={theme}>
+    // Aplicação do tema local
+    <ThemeProvider theme={localTheme}>
       <Container component="main" maxWidth="xs">
-        {/* CssBaseline ajuda a normalizar os estilos */}
-        <CssBaseline />
+        <CssBaseline /> 
         <Box
           sx={{
             marginTop: 8,
@@ -83,7 +84,6 @@ const LoginPage = () => {
             alignItems: 'center',
           }}
         >
-          {/* 3. Título principal agora usa a cor primária do tema */}
           <Typography component="h1" variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
             ThriveCorp
           </Typography>
@@ -132,7 +132,6 @@ const LoginPage = () => {
                 ),
               }}
             />
-            {/* O botão "Entrar" automaticamente herda a cor primária */}
             <Button
               type="submit"
               fullWidth
@@ -143,18 +142,13 @@ const LoginPage = () => {
                 mb: 2,
                 py: 1.5,
                 fontSize: '1rem',
-                // Efeito hover para escurecer um pouco o botão
-                '&:hover': {
-                  backgroundColor: '#3a0066',
-                }
               }}
             >
               {loading ? 'A entrar...' : 'Entrar'}
             </Button>
             <Typography align="center">
               Não tem registro?{' '}
-              {/* 4. Link agora usa a cor primária do tema para consistência */}
-              <Link to="/register" style={{ color: theme.palette.primary.main, fontWeight: 'bold', textDecoration: 'none' }}>
+              <Link to="/register" style={{ color: localTheme.palette.primary.main, fontWeight: 'bold', textDecoration: 'none' }}>
                 Crie a sua conta
               </Link>
             </Typography>

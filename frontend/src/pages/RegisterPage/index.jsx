@@ -12,52 +12,153 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// Tema (pode ser movido para um arquivo separado como theme.js)
-const theme = createTheme({
+// TEMA LOCAL: Definindo a cor principal com o valor desejado (#1e293b)
+const BLUE_COLOR = '#1e293b';
+
+const localTheme = createTheme({
   palette: {
-    primary: { main: '#4B0082' },
-    secondary: { main: '#98FF98' },
-    text: { primary: '#212529', secondary: '#6c757d' },
-    background: { default: '#FFFFFF' },
+    primary: {
+      main: BLUE_COLOR, // Aplicando #1e293b
+    },
+    // Mantendo as cores globais, se necessário
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
-    button: { textTransform: 'none', fontWeight: 'bold' },
+    button: {
+      textTransform: 'none',
+      fontWeight: 'bold',
+      color: 'white', // FORÇA O TEXTO DO BOTÃO A SER BRANCO
+    },
   },
 });
 
 const LogoIcon = () => (
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="24" height="24" rx="6" fill={theme.palette.primary.main}/>
+        <rect width="24" height="24" rx="6" fill={localTheme.palette.primary.main}/> 
         <path d="M7 6H17M7 12H17M7 18H13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
+// --------------------------------------------------
+// FUNÇÃO DE MÁSCARA
+// --------------------------------------------------
+const maskDocument = (value) => {
+    // 1. Limpa o valor (mantém apenas números)
+    let cleanedValue = value.replace(/\D/g, '');
+
+    // 2. Limita o tamanho (máximo 14 para CNPJ)
+    cleanedValue = cleanedValue.substring(0, 14);
+
+    if (cleanedValue.length <= 11) {
+        // CPF (11 dígitos): 000.000.000-00
+        return cleanedValue
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+        // CNPJ (12 a 14 dígitos): 00.000.000/0000-00
+        return cleanedValue
+            .replace(/^(\d{2})(\d)/, '$1.$2')
+            .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/\.(\d{3})(\d)/, '$1/$2')
+            .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    }
+};
+// --------------------------------------------------
+
 const RegisterPage = () => {
-    // 1. ADICIONADO 'company_address' AO ESTADO INICIAL
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', email: '', password: '', confirmPassword: '', role: 'company_admin',
-        company_name: '', company_cnpj: '', company_address: '', // <-- ADICIONADO AQUI
+        company_name: '', company_cnpj: '', company_address: '', 
         provider_name: '', provider_cnpj: '', provider_address: '',
     });
+    // NOVO ESTADO: Para armazenar erros de validação
+    const [formErrors, setFormErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const handleFormChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    // --------------------------------------------------
+    // FUNÇÃO DE VALIDAÇÃO
+    // --------------------------------------------------
+    const validateForm = () => {
+        let errors = {};
+        let isValid = true;
+
+        // 1. Validação de E-mail (Permite .com, .com.br, etc.)
+        // CORREÇÃO: Regex mais flexível para aceitar TLDs de 2+ letras, opcionalmente seguido por outro nível (ex: .com.br)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,3})?$/;
+        
+        if (!formData.email || !emailRegex.test(formData.email)) {
+            errors.email = 'E-mail inválido. Verifique o formato (ex: nome@dominio.com ou nome@dominio.com.br).';
+            isValid = false;
+        }
+
+        // 2. Validação de Senha (min 8 caracteres e confirmação)
+        if (formData.password.length < 8) {
+            errors.password = 'A senha deve ter no mínimo 8 caracteres.';
+            isValid = false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            errors.confirmPassword = 'As senhas não coincidem.';
+            isValid = false;
+        }
+
+        // 3. Validação de Documento Federal (CNPJ/CPF) - Checa apenas o formato com 14 dígitos limpos
+        const docField = formData.role === 'company_admin' ? 'company_cnpj' : 'provider_cnpj';
+        const docValue = formData[docField];
+        
+        // Remove a formatação para contar dígitos.
+        const cleanedDoc = docValue.replace(/\D/g, '');
+
+        if (!docValue) {
+            errors[docField] = `${formData.role === 'company_admin' ? 'CNPJ' : 'Documento'} é obrigatório.`;
+            isValid = false;
+        } else if (cleanedDoc.length !== 14 && cleanedDoc.length !== 11) {
+             errors[docField] = 'O documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ).';
+            isValid = false;
+        }
+
+
+        setFormErrors(errors);
+        return isValid;
+    };
+
+    const handleDocumentChange = (e) => {
+        const { name, value } = e.target;
+        // Aplica a máscara e atualiza o estado
+        const maskedValue = maskDocument(value);
+
+        setFormData(prev => ({ ...prev, [name]: maskedValue }));
+
+        // Limpa o erro ao começar a digitar
+        if (formErrors[name]) {
+            setFormErrors(prev => ({ ...prev, [name]: null }));
+        }
+    };
+
+
+    const handleFormChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        // Limpa o erro ao começar a digitar
+        if (formErrors[e.target.name]) {
+            setFormErrors(prev => ({ ...prev, [e.target.name]: null }));
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setError(null);
-
-        if (formData.password !== formData.confirmPassword) {
-            setError('As senhas não coincidem.');
+        
+        if (!validateForm()) {
+            // Se a validação local falhar, para a execução
             setLoading(false);
             return;
         }
+
+        setLoading(true);
 
         try {
             await axios.post(`${API_URL}/api/auth/register`, formData);
@@ -70,71 +171,163 @@ const RegisterPage = () => {
     };
 
     return (
-        <ThemeProvider theme={theme}>
-            <Container component="main" maxWidth="sm">
-                <CssBaseline />
-                <Box sx={{ marginTop: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <LogoIcon />
-                    <Typography component="h1" variant="h4" sx={{ mt: 1, fontWeight: 'bold', color: 'primary.main' }}>
-                        ThriveCorp
-                    </Typography>
-                    <Typography component="p" sx={{ color: 'text.secondary', mb: 3 }}>
-                        Crie a sua conta
-                    </Typography>
+        <ThemeProvider theme={localTheme}>
+            {/* Box externo para aplicar o fundo claro/branco */}
+             <Box sx={{ 
+                    minHeight: '100vh', 
+                    bgcolor: 'background.default', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    py: 4
+                }}
+            >
+                {/* Container principal para o formulário (caixa branca) */}
+                <Container component="main" maxWidth="sm" sx={{ bgcolor: 'white', borderRadius: 2, p: 3, boxShadow: 3 }}>
+                    <CssBaseline />
+                    <Box sx={{ marginTop: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <LogoIcon />
+                        <Typography component="h1" variant="h4" sx={{ mt: 1, fontWeight: 'bold', color: 'primary.main' }}>
+                            ThriveCorp
+                        </Typography>
+                        <Typography component="p" sx={{ color: 'text.secondary', mb: 3 }}>
+                            Crie a sua conta
+                        </Typography>
 
-                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                        <Grid container spacing={2}>
-                            {error && <Grid item xs={12}><Alert severity="error">{error}</Alert></Grid>}
-                            
-                            <Grid item xs={12} sm={6}><TextField name="first_name" required fullWidth label="Primeiro Nome" value={formData.first_name} onChange={handleFormChange} /></Grid>
-                            <Grid item xs={12} sm={6}><TextField name="last_name" required fullWidth label="Sobrenome" value={formData.last_name} onChange={handleFormChange} /></Grid>
-                            
-                            <Grid item xs={12}><TextField name="email" required fullWidth label="Email" type="email" value={formData.email} onChange={handleFormChange} /></Grid>
-                            <Grid item xs={12}><TextField name="password" required fullWidth label="Senha" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleFormChange} InputProps={{ endAdornment: (
-                                <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>
-                            )}} /></Grid>
-                            <Grid item xs={12}><TextField name="confirmPassword" required fullWidth label="Confirmar Senha" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleFormChange} InputProps={{ endAdornment: (
-                                <InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">{showConfirmPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>
-                            )}} /></Grid>
-                            
-                            <Grid item xs={12}>
-                                <FormControl fullWidth>
-                                    <InputLabel id="role-select-label">Tipo de Conta</InputLabel>
-                                    <Select labelId="role-select-label" name="role" value={formData.role} label="Tipo de Conta" onChange={handleFormChange}>
-                                        <MenuItem value="company_admin">Administrador de Empresa</MenuItem>
-                                        <MenuItem value="provider">Fornecedor (Academia)</MenuItem>
-                                    </Select>
-                                </FormControl>
+                        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                            <Grid container spacing={2}>
+                                {error && <Grid item xs={12}><Alert severity="error">{error}</Alert></Grid>}
+                                
+                                <Grid item xs={12} sm={6}><TextField name="first_name" required fullWidth label="Primeiro Nome" value={formData.first_name} onChange={handleFormChange} /></Grid>
+                                <Grid item xs={12} sm={6}><TextField name="last_name" required fullWidth label="Sobrenome" value={formData.last_name} onChange={handleFormChange} /></Grid>
+                                
+                                {/* EMAIL com validação */}
+                                <Grid item xs={12}>
+                                    <TextField 
+                                        name="email" 
+                                        required 
+                                        fullWidth 
+                                        label="Email" 
+                                        type="email" 
+                                        value={formData.email} 
+                                        onChange={handleFormChange} 
+                                        error={!!formErrors.email}
+                                        helperText={formErrors.email}
+                                    />
+                                </Grid>
+                                
+                                {/* SENHA com validação */}
+                                <Grid item xs={12}>
+                                    <TextField 
+                                        name="password" 
+                                        required 
+                                        fullWidth 
+                                        label="Senha" 
+                                        type={showPassword ? 'text' : 'password'} 
+                                        value={formData.password} 
+                                        onChange={handleFormChange} 
+                                        error={!!formErrors.password}
+                                        helperText={formErrors.password || 'Mínimo de 8 caracteres.'}
+                                        InputProps={{ endAdornment: (
+                                            <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)} edge="end">{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>
+                                        )}} 
+                                    />
+                                </Grid>
+                                
+                                {/* CONFIRMAR SENHA com validação */}
+                                <Grid item xs={12}>
+                                    <TextField 
+                                        name="confirmPassword" 
+                                        required 
+                                        fullWidth 
+                                        label="Confirme a Senha" 
+                                        type={showConfirmPassword ? 'text' : 'password'} 
+                                        value={formData.confirmPassword} 
+                                        onChange={handleFormChange} 
+                                        error={!!formErrors.confirmPassword}
+                                        helperText={formErrors.confirmPassword}
+                                        InputProps={{ endAdornment: (
+                                            <InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">{showConfirmPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>
+                                        )}} 
+                                    />
+                                </Grid>
+                                
+                                <Grid item xs={12}>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="role-select-label">Tipo de Conta</InputLabel>
+                                        <Select labelId="role-select-label" name="role" value={formData.role} label="Tipo de Conta" onChange={handleFormChange}>
+                                            <MenuItem value="company_admin">Administrador de Empresa</MenuItem>
+                                            <MenuItem value="provider">Fornecedor (Academia)</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                
+                                {formData.role === 'company_admin' ? (
+                                    <>
+                                        <Grid item xs={12}><TextField name="company_name" required fullWidth label="Nome da Empresa" value={formData.company_name} onChange={handleFormChange} /></Grid>
+                                        {/* CNPJ com MÁSCARA */}
+                                        <Grid item xs={12}>
+                                            <TextField 
+                                                name="company_cnpj" 
+                                                required 
+                                                fullWidth 
+                                                label="CNPJ da Empresa (00.000.000/0000-00)" 
+                                                value={formData.company_cnpj} 
+                                                onChange={handleDocumentChange} // USA O NOVO HANDLER
+                                                error={!!formErrors.company_cnpj}
+                                                helperText={formErrors.company_cnpj}
+                                                inputProps={{ maxLength: 18 }} // Limita a entrada formatada
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}><TextField name="company_address" required fullWidth label="Endereço da Empresa" value={formData.company_address} onChange={handleFormChange} /></Grid>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Grid item xs={12}><TextField name="provider_name" required fullWidth label="Nome do Fornecedor" value={formData.provider_name} onChange={handleFormChange} /></Grid>
+                                         {/* CNPJ/CPF com MÁSCARA */}
+                                        <Grid item xs={12}>
+                                            <TextField 
+                                                name="provider_cnpj" 
+                                                required 
+                                                fullWidth 
+                                                label="Documento Federal (CNPJ/CPF)" 
+                                                value={formData.provider_cnpj} 
+                                                onChange={handleDocumentChange} // USA O NOVO HANDLER
+                                                error={!!formErrors.provider_cnpj}
+                                                helperText={formErrors.provider_cnpj}
+                                                inputProps={{ maxLength: 18 }} // Limita a entrada formatada
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12}><TextField name="provider_address" required fullWidth label="Endereço do Fornecedor" value={formData.provider_address} onChange={handleFormChange} /></Grid>
+                                    </>
+                                )}
                             </Grid>
                             
-                            {formData.role === 'company_admin' ? (
-                                <>
-                                    <Grid item xs={12}><TextField name="company_name" required fullWidth label="Nome da Empresa" value={formData.company_name} onChange={handleFormChange} /></Grid>
-                                    <Grid item xs={12}><TextField name="company_cnpj" required fullWidth label="CNPJ da Empresa" value={formData.company_cnpj} onChange={handleFormChange} /></Grid>
-                                    {/* 2. ADICIONADO CAMPO DE ENDEREÇO DA EMPRESA */}
-                                    <Grid item xs={12}><TextField name="company_address" required fullWidth label="Endereço da Empresa" value={formData.company_address} onChange={handleFormChange} /></Grid>
-                                </>
-                            ) : (
-                                <>
-                                    <Grid item xs={12}><TextField name="provider_name" required fullWidth label="Nome do Fornecedor" value={formData.provider_name} onChange={handleFormChange} /></Grid>
-                                    <Grid item xs={12}><TextField name="provider_cnpj" required fullWidth label="CNPJ do Fornecedor" value={formData.provider_cnpj} onChange={handleFormChange} /></Grid>
-                                    <Grid item xs={12}><TextField name="provider_address" required fullWidth label="Endereço do Fornecedor" value={formData.provider_address} onChange={handleFormChange} /></Grid>
-                                </>
-                            )}
-                        </Grid>
-                        
-                        <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem', '&:hover': { backgroundColor: '#3a0066' } }}>
-                            {loading ? 'Criando conta...' : 'Criar conta'}
-                        </Button>
-                        <Typography align="center">
-                            Já tem uma conta?{' '}
-                            <Link to="/login" style={{ color: theme.palette.primary.main, fontWeight: 'bold', textDecoration: 'none' }}>
-                                Faça login
-                            </Link>
-                        </Typography>
+                            <Button 
+                                type="submit" 
+                                fullWidth 
+                                variant="contained" 
+                                disabled={loading} 
+                                sx={{ 
+                                    mt: 3, 
+                                    mb: 2, 
+                                    py: 1.5, 
+                                    fontSize: '1rem', 
+                                }} 
+                            >
+                                {loading ? 'Criando conta...' : 'Criar conta'}
+                            </Button>
+                            <Typography align="center">
+                                Já tem uma conta?{' '}
+                                <Link to="/login" style={{ color: localTheme.palette.primary.main, fontWeight: 'bold', textDecoration: 'none' }}>
+                                    Faça login
+                                </Link>
+                            </Typography>
+                        </Box>
                     </Box>
-                </Box>
-            </Container>
+                </Container>
+            </Box>
         </ThemeProvider>
     );
 };
