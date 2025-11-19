@@ -151,7 +151,8 @@ async function reproveGymAndDeactivateProvider(gymId) {
 
                 await connection.execute('DELETE FROM providers WHERE id = ?', [providerId]);
 
-                await connection.execute('UPDATE users SET status = "inactive" WHERE id = ?', [userId]);
+                // CORREÇÃO: Deleta o usuário ao invés de inativar
+                await connection.execute('DELETE FROM users WHERE id = ?', [userId]);
             }
         }
 

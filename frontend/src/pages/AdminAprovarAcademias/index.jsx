@@ -84,7 +84,7 @@ const AdminAprovarAcademias = () => {
         setDialogOpen(false);
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`h${API_URL}/api/gyms/${gymId}/reprove`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`${API_URL}/api/gyms/${gymId}/reprove`, { headers: { Authorization: `Bearer ${token}` } });
             fetchGyms();
         } catch (err) { setError('Falha ao reprovar a academia.'); }
     };

@@ -58,68 +58,65 @@ async function deleteCompany(id) {
         );
 
         if (companyResult.length === 0) {
-            // Se a empresa não existe, encerra a transação e retorna false
             await connection.rollback();
             connection.end();
-            return false; // Indica que a empresa não foi encontrada
+            return false; // Empresa não encontrada
         }
         const adminId = companyResult[0]?.admin_id;
 
-        // 2. Encontrar os IDs de todos os colaboradores da empresa
+        // 2. Encontrar os IDs de todos os colaboradores da empresa (usuários)
         const [collaboratorsResult] = await connection.execute(
             'SELECT user_id FROM collaborators WHERE company_id = ?',
             [id]
         );
         const collaboratorUserIds = collaboratorsResult.map(collab => collab.user_id);
 
-        // 3. Montar a lista de todos os User IDs a serem desativados (Admin + Colaboradores)
-        const userIdsToDeactivate = [];
-        if (adminId) {
-            userIdsToDeactivate.push(adminId);
-        }
-        userIdsToDeactivate.push(...collaboratorUserIds);
-
-        // 4. Desativar todos os usuários encontrados (se houver algum)
-        if (userIdsToDeactivate.length > 0) {
-            // Usar a cláusula IN para atualizar múltiplos usuários de uma vez
-            // O .map(?) cria os placeholders necessários (?, ?, ...)
-            const placeholders = userIdsToDeactivate.map(() => '?').join(',');
-            await connection.execute(
-                `UPDATE users SET status = "inactive" WHERE id IN (${placeholders})`,
-                userIdsToDeactivate
-            );
-            console.log(`Desativados usuários com IDs: ${userIdsToDeactivate.join(', ')}`); // Log para depuração
-        }
-
-        // 5. (Opcional, mas recomendado) Deletar os registros de colaboradores associados
+        // 3. Deletar os registros na tabela de RELACIONAMENTO (collaborators) primeiro
+        // Isso remove a dependência dos usuários colaboradores e da empresa
         if (collaboratorUserIds.length > 0) {
              await connection.execute(
                 'DELETE FROM collaborators WHERE company_id = ?',
                 [id]
             );
-            console.log(`Deletados colaboradores da empresa ID: ${id}`); // Log para depuração
+            console.log(`Deletados colaboradores da empresa ID: ${id}`);
         }
 
-
-        // 6. Deletar a empresa
+        // 4. Deletar a EMPRESA
+        // Isso remove a dependência do admin_id
         const [deleteCompanyResult] = await connection.execute(
             'DELETE FROM companies WHERE id = ?',
             [id]
         );
-        console.log(`Deletada empresa ID: ${id}`); // Log para depuração
+        console.log(`Deletada empresa ID: ${id}`);
 
 
-        // 7. Se tudo correu bem, confirma a transação
+        // 5. AGORA SIM: Deletar os USUÁRIOS (Admin + Colaboradores)
+        // Montar a lista de todos os User IDs a serem deletados
+        const userIdsToDelete = [];
+        if (adminId) {
+            userIdsToDelete.push(adminId);
+        }
+        userIdsToDelete.push(...collaboratorUserIds);
+
+        if (userIdsToDelete.length > 0) {
+            const placeholders = userIdsToDelete.map(() => '?').join(',');
+            // MUDANÇA CRÍTICA: DELETE ao invés de UPDATE
+            await connection.execute(
+                `DELETE FROM users WHERE id IN (${placeholders})`,
+                userIdsToDelete
+            );
+            console.log(`Deletados usuários (Admin/Colaboradores) com IDs: ${userIdsToDelete.join(', ')}`);
+        }
+
         await connection.commit();
         connection.end();
-        return deleteCompanyResult.affectedRows > 0; // Retorna true se a empresa foi deletada
+        return deleteCompanyResult.affectedRows > 0;
 
     } catch (error) {
-        // Se qualquer operação falhar, desfaz todas as alterações
         await connection.rollback();
         connection.end();
-        console.error('Erro ao deletar empresa e desativar usuários:', error); // Log detalhado do erro
-        throw error; // Propaga o erro para o controller
+        console.error('Erro ao deletar empresa e usuários:', error);
+        throw error;
     }
 }
 
