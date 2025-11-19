@@ -10,10 +10,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import './ProviderDashboard.css';
-import { API_URL } from '../../apiConfig'
+import { API_URL } from '../../apiConfig';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 
-// Estilo para o Modal
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -27,29 +26,27 @@ const modalStyle = {
 };
 
 const ProviderDashboard = () => {
-    // Estados para os dados
     const [gyms, setGyms] = useState([]);
     const [accessReport, setAccessReport] = useState([]);
     const [plans, setPlans] = useState([]);
     
-    // Estados de controle da UI
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isEditingPlan, setIsEditingPlan] = useState(false);
     
-    // Estados para os formulários
     const [planForm, setPlanForm] = useState({ id: null, gym_id: '', name: '', description: '', price_per_access: '' });
     const [gymForm, setGymForm] = useState({ id: null, name: '', address: '' });
     const [isEditingGym, setIsEditingGym] = useState(false);
 
-    // Novos estados para o Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Funções de controle do Modal
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogConfig, setDialogConfig] = useState({ title: '', message: '', onConfirm: () => {} });
+
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        resetGymForm(); // Limpa o formulário ao fechar
+        resetGymForm();
     };
 
     const fetchAllData = async () => {
@@ -80,7 +77,6 @@ const ProviderDashboard = () => {
         fetchAllData();
     }, []);
 
-    // --- LÓGICA DE GERENCIAMENTO DE ACADEMIAS (ATUALIZADA PARA USAR O MODAL) ---
     const handleGymFormChange = (e) => setGymForm({ ...gymForm, [e.target.name]: e.target.value });
     const resetGymForm = () => {
         setIsEditingGym(false);
@@ -97,18 +93,16 @@ const ProviderDashboard = () => {
             } else {
                 await axios.post(`${API_URL}/api/provider/gyms`, gymForm, headers);
             }
-            handleCloseModal(); // Fecha o modal após o sucesso
+            handleCloseModal();
             fetchAllData();
         } catch (err) { setError('Falha ao salvar a academia.'); }
     };
 
-    // Abre o modal para ADICIONAR
     const handleAddGymClick = () => {
         resetGymForm();
         handleOpenModal();
     };
 
-    // Abre o modal para EDITAR
     const handleEditGymClick = (gym) => {
         setIsEditingGym(true);
         setGymForm(gym);
@@ -116,18 +110,25 @@ const ProviderDashboard = () => {
     };
 
     const handleDeleteGymClick = async (gymId) => {
-        if (window.confirm("Tem certeza que deseja deletar esta academia?")) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.delete(`${API_URL}/api/gyms/${gymId}`, { headers: { Authorization: `Bearer ${token}` } });
-                fetchAllData();
-            } catch (err) {
-                setError('Falha ao deletar a academia.');
-            }
+        setDialogOpen(false);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${API_URL}/api/gyms/${gymId}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchAllData();
+        } catch (err) {
+            setError('Falha ao deletar a academia.');
         }
     };
+
+    const openDeleteGymDialog = (gymId) => {
+        setDialogConfig({
+            title: 'Deletar Academia',
+            message: 'Tem certeza que deseja deletar esta academia? Esta ação não pode ser desfeita.',
+            onConfirm: () => handleDeleteGymClick(gymId)
+        });
+        setDialogOpen(true);
+    };
     
-    // --- LÓGICA DE GERENCIAMENTO DE PLANOS ---
     const handlePlanFormChange = (e) => setPlanForm({ ...planForm, [e.target.name]: e.target.value });
     const resetPlanForm = () => {
         setIsEditingPlan(false);
@@ -154,21 +155,27 @@ const ProviderDashboard = () => {
         setPlanForm(plan);
     };
     const handleDeletePlanClick = async (planId) => {
-        if (window.confirm("Tem certeza que deseja deletar este plano?")) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.delete(`${API_URL}/api/plans/${planId}`, { headers: { Authorization: `Bearer ${token}` } });
-                fetchAllData();
-            } catch (err) {
-                setError('Falha ao deletar o plano.');
-            }
+        setDialogOpen(false);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${API_URL}/api/plans/${planId}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchAllData();
+        } catch (err) {
+            setError('Falha ao deletar o plano.');
         }
     };
+
+    const openDeletePlanDialog = (planId) => {
+        setDialogConfig({
+            title: 'Deletar Plano',
+            message: 'Tem certeza que deseja deletar este plano? Esta ação não pode ser desfeita.',
+            onConfirm: () => handleDeletePlanClick(planId)
+        });
+        setDialogOpen(true);
+    };
     
-    // Filtra academias que ainda não possuem um plano associado
     const gymsWithoutPlans = gyms.filter(gym => !plans.some(plan => plan.gym_id === gym.id));
     
-    // Mapeia o nome da academia para cada plano para exibição
     const plansWithGymNames = plans.map(plan => {
         const gym = gyms.find(g => g.id === plan.gym_id);
         return { ...plan, gym_name: gym ? gym.name : 'Academia não encontrada' };
@@ -180,7 +187,6 @@ const ProviderDashboard = () => {
         <Box sx={{ padding: 3 }}>
             {error && <Typography color="error">{error}</Typography>}
 
-            {/* Modal para Adicionar/Editar Academia */}
             <Modal
                 open={isModalOpen}
                 onClose={handleCloseModal}
@@ -201,15 +207,17 @@ const ProviderDashboard = () => {
                 </Box>
             </Modal>
 
-            {/* Gerenciamento de Academias */}
             <Paper elevation={3} sx={{ padding: 2, marginBottom: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <StorefrontIcon color="primary" />
                         <Typography variant="h5">Gerenciar Academias</Typography>
                     </Box>
-                    <IconButton color="primary" onClick={handleAddGymClick}>
-                        <AddCircleIcon sx={{ fontSize: 30 }} />
+                    <IconButton color="primary"
+                    onClick={handleAddGymClick}
+                    aria-label="add-gym"
+                    >
+                    <AddCircleIcon sx={{ fontSize: 30 }} />
                     </IconButton>
                 </Box>
                 
@@ -220,7 +228,7 @@ const ProviderDashboard = () => {
                                 secondaryAction={
                                     <>
                                         <IconButton edge="end" aria-label="edit" onClick={() => handleEditGymClick(gym)}><EditIcon /></IconButton>
-                                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteGymClick(gym.id)}><DeleteIcon /></IconButton>
+                                        <IconButton edge="end" aria-label="delete" onClick={() => openDeleteGymDialog(gym.id)}><DeleteIcon /></IconButton>
                                     </>
                                 }
                             >
@@ -233,7 +241,6 @@ const ProviderDashboard = () => {
                 </List>
             </Paper>
 
-            {/* Gerenciamento de Planos */}
             <Paper elevation={3} sx={{ padding: 2, marginBottom: 4 }}>
                 <Typography variant="h5" gutterBottom>Gerenciar Planos</Typography>
                 <Box component="form" onSubmit={handlePlanSubmit} sx={{ marginBottom: 2 }}>
@@ -271,7 +278,7 @@ const ProviderDashboard = () => {
                                 secondaryAction={
                                     <>
                                         <IconButton edge="end" aria-label="edit" onClick={() => handleEditPlanClick(plan)}><EditIcon /></IconButton>
-                                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeletePlanClick(plan.id)}><DeleteIcon /></IconButton>
+                                        <IconButton edge="end" aria-label="delete" onClick={() => openDeletePlanDialog(plan.id)}><DeleteIcon /></IconButton>
                                     </>
                                 }
                             >
@@ -289,7 +296,6 @@ const ProviderDashboard = () => {
                 </List>
             </Paper>
 
-            {/* Relatório de Check-ins */}
             <Paper elevation={3} sx={{ padding: 2 }}>
                 <Typography variant="h5" gutterBottom>Relatório de Check-ins</Typography>
                 <TableContainer component={Paper}>
@@ -313,6 +319,14 @@ const ProviderDashboard = () => {
                     </Table>
                 </TableContainer>
             </Paper>
+
+            <ConfirmationDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                onConfirm={dialogConfig.onConfirm}
+                title={dialogConfig.title}
+                message={dialogConfig.message}
+            />
         </Box>
     );
 };

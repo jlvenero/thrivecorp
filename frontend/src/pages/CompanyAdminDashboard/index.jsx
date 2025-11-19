@@ -4,16 +4,15 @@ import {
     Box, Typography, Paper, TextField, Button, Grid, Modal, List,
     ListItem, ListItemText, Divider, IconButton, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, InputLabel, FormControl,
-    Tooltip // <-- Adicionado Tooltip
+    Tooltip
 } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import PersonOffIcon from '@mui/icons-material/PersonOff';
-import DownloadIcon from '@mui/icons-material/Download'; // <-- Importado Ícone de Download
-import './CompanyAdminDashboard.css';
-import { API_URL } from '../../apiConfig'
+import DownloadIcon from '@mui/icons-material/Download';
+import { API_URL } from '../../apiConfig';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 
-// Estilo para o Modal
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -27,16 +26,15 @@ const modalStyle = {
 };
 
 const CompanyAdminDashboard = () => {
-    // Estados para os dados
     const [collaborators, setCollaborators] = useState([]);
     const [accessReport, setAccessReport] = useState([]);
-
-    // Estados de controle da interface
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Estado para o formulário de novo colaborador
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogConfig, setDialogConfig] = useState({ title: '', message: '', onConfirm: () => {} });
+
     const [newCollaborator, setNewCollaborator] = useState({
         first_name: '',
         last_name: '',
@@ -44,13 +42,11 @@ const CompanyAdminDashboard = () => {
         password: ''
     });
 
-    // Estado para os filtros de data do relatório
     const [selectedDate, setSelectedDate] = useState({
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1
     });
 
-    // Funções de controle do Modal
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => {
         setIsModalOpen(false);
@@ -95,7 +91,6 @@ const CompanyAdminDashboard = () => {
         fetchAccessReport();
     }, [selectedDate]);
 
-    // Handlers para os formulários e filtros
     const handleDateChange = (e) => {
         const { name, value } = e.target;
         setSelectedDate(prev => ({ ...prev, [name]: parseInt(value) }));
@@ -121,17 +116,25 @@ const CompanyAdminDashboard = () => {
     };
 
     const handleDeactivate = async (collaboratorId) => {
-        if (window.confirm("Tem certeza que deseja desativar este colaborador?")) {
-            try {
-                const token = localStorage.getItem('token');
-                await axios.put(`${API_URL}/api/company/collaborators/${collaboratorId}/deactivate`, {}, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                fetchCollaborators();
-            } catch (err) {
-                setError('Falha ao desativar o colaborador.');
-            }
+        setDialogOpen(false);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${API_URL}/api/company/collaborators/${collaboratorId}/deactivate`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchCollaborators();
+        } catch (err) {
+            setError('Falha ao desativar o colaborador.');
         }
+    };
+
+    const openDeactivateDialog = (collaboratorId) => {
+        setDialogConfig({
+            title: 'Desativar Colaborador',
+            message: 'Tem certeza que deseja desativar este colaborador? Ele perderá o acesso imediatamente.',
+            onConfirm: () => handleDeactivate(collaboratorId)
+        });
+        setDialogOpen(true);
     };
 
     const handleDownload = async () => {
@@ -158,11 +161,8 @@ const CompanyAdminDashboard = () => {
         }
     };
 
-    // *** NOVA FUNÇÃO PARA DOWNLOAD DE COLABORADORES ***
     const handleDownloadCollaborators = () => {
-        setError(null); // Limpa erro anterior
-
-        // Filtra para garantir que apenas colaboradores ativos sejam exportados (redundante se a API já filtra)
+        setError(null);
         const activeCollaborators = collaborators.filter(c => c.status === 'active');
 
         if (!activeCollaborators || activeCollaborators.length === 0) {
@@ -170,44 +170,32 @@ const CompanyAdminDashboard = () => {
             return;
         }
 
-        // 1. Definir Cabeçalhos
-        const headers = [
-            'Primeiro Nome',
-            'Sobrenome',
-            'Email'
-        ];
-
-        // Função auxiliar para escapar aspas duplas dentro dos campos
+        const headers = ['Primeiro Nome', 'Sobrenome', 'Email'];
         const escapeCsvCell = (cellData) => {
-            const stringData = String(cellData || ''); // Garante que é string
+            const stringData = String(cellData || '');
             if (stringData.includes('"') || stringData.includes(';') || stringData.includes('\n')) {
-                // Se contém aspas, ponto-e-vírgula ou nova linha, coloca entre aspas e duplica as aspas internas
                 return `"${stringData.replace(/"/g, '""')}"`;
             }
             return stringData;
         };
 
-
-        // 2. Mapear os dados para linhas do CSV
         const rows = activeCollaborators.map(collab => [
             escapeCsvCell(collab.first_name),
             escapeCsvCell(collab.last_name),
             escapeCsvCell(collab.email)
         ]);
 
-        // 3. Montar o conteúdo CSV
-        let csvContent = '\uFEFF'; // BOM UTF-8
+        let csvContent = '\uFEFF';
         csvContent += headers.join(';') + '\n';
         rows.forEach(row => {
             csvContent += row.join(';') + '\n';
         });
 
-        // 4. Criar Blob e Link para Download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         if (link.download !== undefined) {
             const url = URL.createObjectURL(blob);
-            const fileName = `lista-colaboradores-${new Date().toISOString().split('T')[0]}.csv`; // Nome do arquivo com data
+            const fileName = `lista-colaboradores-${new Date().toISOString().split('T')[0]}.csv`;
             link.setAttribute('href', url);
             link.setAttribute('download', fileName);
             link.style.visibility = 'hidden';
@@ -219,7 +207,6 @@ const CompanyAdminDashboard = () => {
             setError('Seu navegador não suporta a função de download direto.');
         }
     };
-    // *** FIM DA NOVA FUNÇÃO ***
 
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
     const totalCost = accessReport.reduce((sum, access) => sum + parseFloat(access.price_per_access || 0), 0);
@@ -228,7 +215,6 @@ const CompanyAdminDashboard = () => {
         <Box sx={{ padding: 3 }}>
             {error && <Typography color="error" gutterBottom>{error}</Typography>}
 
-            {/* Modal para Adicionar Novo Colaborador */}
             <Modal open={isModalOpen} onClose={handleCloseModal}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" component="h2">Adicionar Novo Colaborador</Typography>
@@ -245,45 +231,44 @@ const CompanyAdminDashboard = () => {
                 </Box>
             </Modal>
 
-            {/* Gerenciamento de Colaboradores */}
             <Paper elevation={3} sx={{ padding: 2, marginBottom: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <GroupIcon color="primary" />
                         <Typography variant="h5">Gerenciamento de Colaboradores</Typography>
                     </Box>
-                    {/* Container para os botões de ação */}
                      <Box>
-                         {/* *** BOTÃO DE DOWNLOAD ADICIONADO *** */}
                          <Tooltip title="Baixar Lista de Colaboradores (CSV)">
-                             {/* Desabilitar se não houver colaboradores ativos */}
-                             <span> {/* Span necessário para Tooltip em botão desabilitado */}
+                             <span>
                                 <IconButton
                                     color="primary"
                                     onClick={handleDownloadCollaborators}
-                                    disabled={!collaborators.some(c => c.status === 'active')} // Desabilita se não houver ativos
+                                    disabled={!collaborators.some(c => c.status === 'active')}
+                                    aria-label="download-csv"
                                 >
                                     <DownloadIcon />
                                 </IconButton>
                             </span>
                         </Tooltip>
                         <Tooltip title="Adicionar Novo Colaborador">
-                            <IconButton color="primary" onClick={handleOpenModal}>
+                            <IconButton color="primary"
+                            onClick={handleOpenModal}
+                            aria-label="add-collaborator"
+                            >
                                 <AddCircleIcon sx={{ fontSize: 30 }} />
                             </IconButton>
                         </Tooltip>
                     </Box>
                 </Box>
                 <List>
-                   {/* Filtra para exibir apenas ativos na lista E mostra mensagem se não houver */}
                    {collaborators.filter(c => c.status === 'active').length > 0 ? (
                        collaborators.map((collaborator, index) => (
-                         collaborator.status === 'active' && ( // Redundante, mas seguro
+                         collaborator.status === 'active' && (
                             <React.Fragment key={collaborator.id}>
                                 <ListItem
                                     secondaryAction={
                                         <Tooltip title="Desativar Colaborador">
-                                            <IconButton edge="end" aria-label="deactivate" onClick={() => handleDeactivate(collaborator.id)}>
+                                            <IconButton edge="end" aria-label="deactivate" onClick={() => openDeactivateDialog(collaborator.id)}>
                                                 <PersonOffIcon color="error" />
                                             </IconButton>
                                         </Tooltip>
@@ -294,13 +279,11 @@ const CompanyAdminDashboard = () => {
                                         secondary={collaborator.email}
                                     />
                                 </ListItem>
-                                {/* Adiciona Divider apenas se não for o último item *visível* */}
                                 {index < collaborators.filter(c => c.status === 'active').length - 1 && <Divider component="li" />}
                             </React.Fragment>
                         )
                     ))
                    ) : (
-                    // Mensagem se a lista filtrada estiver vazia
                     <ListItem>
                         <ListItemText primary="Nenhum colaborador ativo encontrado." sx={{ textAlign: 'center', color: 'text.secondary' }}/>
                     </ListItem>
@@ -308,7 +291,6 @@ const CompanyAdminDashboard = () => {
                 </List>
             </Paper>
 
-            {/* Relatório Detalhado de Acessos */}
             <Paper elevation={3} sx={{ padding: 2 }}>
                 <Typography variant="h5" gutterBottom>Relatório Detalhado de Acessos</Typography>
                 <Box sx={{ display: 'flex', gap: 2, my: 2, alignItems: 'center' }}>
@@ -368,6 +350,15 @@ const CompanyAdminDashboard = () => {
                     )
                 )}
             </Paper>
+
+            {/* 6. Renderização do Dialog */}
+            <ConfirmationDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                onConfirm={dialogConfig.onConfirm}
+                title={dialogConfig.title}
+                message={dialogConfig.message}
+            />
         </Box>
     );
 };
