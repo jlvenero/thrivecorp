@@ -52,7 +52,6 @@ const maskDocument = (value) => {
             .replace(/(\d{3})(\d)/, '$1.$2')
             .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     } else {
-        // CNPJ (12 a 14 dígitos): 00.000.000/0000-00
         return cleanedValue
             .replace(/^(\d{2})(\d)/, '$1.$2')
             .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
@@ -60,7 +59,6 @@ const maskDocument = (value) => {
             .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
     }
 };
-// --------------------------------------------------
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -253,7 +251,7 @@ const RegisterPage = () => {
                                                 onChange={handleDocumentChange}
                                                 error={!!formErrors.company_cnpj}
                                                 helperText={formErrors.company_cnpj}
-                                                inputProps={{ maxLength: 18 }}
+                                                slotProps={{ htmlInput: { maxLength: 18 } }} 
                                             />
                                         </Grid>
                                         <Grid item xs={12}><TextField name="company_address" required fullWidth label="Endereço da Empresa" value={formData.company_address} onChange={handleFormChange} /></Grid>
@@ -271,7 +269,7 @@ const RegisterPage = () => {
                                                 onChange={handleDocumentChange}
                                                 error={!!formErrors.provider_cnpj}
                                                 helperText={formErrors.provider_cnpj}
-                                                inputProps={{ maxLength: 18 }}
+                                                slotProps={{ htmlInput: { maxLength: 18 } }}
                                             />
                                         </Grid>
                                         <Grid item xs={12}><TextField name="provider_address" required fullWidth label="Endereço do Fornecedor" value={formData.provider_address} onChange={handleFormChange} /></Grid>
