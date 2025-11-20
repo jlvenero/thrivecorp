@@ -76,7 +76,7 @@ const ColaboradorDashboard = () => {
         setDialogConfig({
             title: 'Confirmar Check-in',
             message: `Você confirma o check-in na academia "${gymName}"?`,
-            onConfirm: () => handleCheckIn(gymId, gymName)
+            onConfirm: () => { handleCheckIn(gymId, gymName) }
         });
         setDialogOpen(true);
     };

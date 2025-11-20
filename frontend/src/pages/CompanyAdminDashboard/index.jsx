@@ -132,7 +132,8 @@ const CompanyAdminDashboard = () => {
         setDialogConfig({
             title: 'Desativar Colaborador',
             message: 'Tem certeza que deseja desativar este colaborador? Ele perderá o acesso imediatamente.',
-            onConfirm: () => handleDeactivate(collaboratorId)
+            // CORREÇÃO 1: Adicionadas chaves {} para evitar retorno de Promise implícito
+            onConfirm: () => { handleDeactivate(collaboratorId); }
         });
         setDialogOpen(true);
     };
@@ -147,7 +148,8 @@ const CompanyAdminDashboard = () => {
                 responseType: 'blob',
             });
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+            // CORREÇÃO 2: Uso de URL global ao invés de window.URL
+            const url = URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
             const fileName = `relatorio-thrivecorp-${selectedDate.year}-${selectedDate.month}.csv`;
@@ -155,7 +157,7 @@ const CompanyAdminDashboard = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
-            window.URL.revokeObjectURL(url);
+            URL.revokeObjectURL(url);
 
         } catch (err) {
             setError('Falha ao baixar o relatório. Verifique se existem dados no período selecionado.');
@@ -252,10 +254,7 @@ const CompanyAdminDashboard = () => {
                             </span>
                         </Tooltip>
                         <Tooltip title="Adicionar Novo Colaborador">
-                            <IconButton color="primary"
-                            onClick={handleOpenModal}
-                            aria-label="add-collaborator"
-                            >
+                            <IconButton color="primary" onClick={handleOpenModal} aria-label="add-collaborator">
                                 <AddCircleIcon sx={{ fontSize: 30 }} />
                             </IconButton>
                         </Tooltip>
@@ -352,7 +351,6 @@ const CompanyAdminDashboard = () => {
                 )}
             </Paper>
 
-            {/* 6. Renderização do Dialog */}
             <ConfirmationDialog
                 open={dialogOpen}
                 onClose={() => setDialogOpen(false)}
