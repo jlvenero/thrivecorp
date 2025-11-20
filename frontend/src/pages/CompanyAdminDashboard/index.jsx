@@ -155,6 +155,7 @@ const CompanyAdminDashboard = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            window.URL.revokeObjectURL(url);
 
         } catch (err) {
             setError('Falha ao baixar o relatório. Verifique se existem dados no período selecionado.');
