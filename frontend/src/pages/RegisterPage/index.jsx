@@ -20,7 +20,6 @@ const localTheme = createTheme({
     primary: {
       main: BLUE_COLOR, // Aplicando #1e293b
     },
-    // Mantendo as cores globais, se necessário
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
@@ -39,9 +38,6 @@ const LogoIcon = () => (
     </svg>
 );
 
-// --------------------------------------------------
-// FUNÇÃO DE MÁSCARA
-// --------------------------------------------------
 const maskDocument = (value) => {
     // 1. Limpa o valor (mantém apenas números)
     let cleanedValue = value.replace(/\D/g, '');
@@ -56,15 +52,13 @@ const maskDocument = (value) => {
             .replace(/(\d{3})(\d)/, '$1.$2')
             .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     } else {
-        // CNPJ (12 a 14 dígitos): 00.000.000/0000-00
         return cleanedValue
             .replace(/^(\d{2})(\d)/, '$1.$2')
             .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-            .replace(/\.(\d{3})(\d)/, '$1/$2')
+            .replace(/\.(\d{3})(\d)/, '.$1/$2') 
             .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
     }
 };
-// --------------------------------------------------
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -72,7 +66,7 @@ const RegisterPage = () => {
         company_name: '', company_cnpj: '', company_address: '', 
         provider_name: '', provider_cnpj: '', provider_address: '',
     });
-    // NOVO ESTADO: Para armazenar erros de validação
+    
     const [formErrors, setFormErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -80,15 +74,10 @@ const RegisterPage = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // --------------------------------------------------
-    // FUNÇÃO DE VALIDAÇÃO
-    // --------------------------------------------------
     const validateForm = () => {
         let errors = {};
         let isValid = true;
 
-        // 1. Validação de E-mail (Permite .com, .com.br, etc.)
-        // CORREÇÃO: Regex mais flexível para aceitar TLDs de 2+ letras, opcionalmente seguido por outro nível (ex: .com.br)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,3})?$/;
         
         if (!formData.email || !emailRegex.test(formData.email)) {
@@ -96,7 +85,6 @@ const RegisterPage = () => {
             isValid = false;
         }
 
-        // 2. Validação de Senha (min 8 caracteres e confirmação)
         if (formData.password.length < 8) {
             errors.password = 'A senha deve ter no mínimo 8 caracteres.';
             isValid = false;
@@ -106,11 +94,9 @@ const RegisterPage = () => {
             isValid = false;
         }
 
-        // 3. Validação de Documento Federal (CNPJ/CPF) - Checa apenas o formato com 14 dígitos limpos
         const docField = formData.role === 'company_admin' ? 'company_cnpj' : 'provider_cnpj';
         const docValue = formData[docField];
         
-        // Remove a formatação para contar dígitos.
         const cleanedDoc = docValue.replace(/\D/g, '');
 
         if (!docValue) {
@@ -121,28 +107,23 @@ const RegisterPage = () => {
             isValid = false;
         }
 
-
         setFormErrors(errors);
         return isValid;
     };
 
     const handleDocumentChange = (e) => {
         const { name, value } = e.target;
-        // Aplica a máscara e atualiza o estado
         const maskedValue = maskDocument(value);
 
         setFormData(prev => ({ ...prev, [name]: maskedValue }));
 
-        // Limpa o erro ao começar a digitar
         if (formErrors[name]) {
             setFormErrors(prev => ({ ...prev, [name]: null }));
         }
     };
 
-
     const handleFormChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        // Limpa o erro ao começar a digitar
         if (formErrors[e.target.name]) {
             setFormErrors(prev => ({ ...prev, [e.target.name]: null }));
         }
@@ -153,7 +134,6 @@ const RegisterPage = () => {
         setError(null);
         
         if (!validateForm()) {
-            // Se a validação local falhar, para a execução
             setLoading(false);
             return;
         }
@@ -172,7 +152,6 @@ const RegisterPage = () => {
 
     return (
         <ThemeProvider theme={localTheme}>
-            {/* Box externo para aplicar o fundo claro/branco */}
              <Box sx={{ 
                     minHeight: '100vh', 
                     bgcolor: 'background.default', 
@@ -183,7 +162,6 @@ const RegisterPage = () => {
                     py: 4
                 }}
             >
-                {/* Container principal para o formulário (caixa branca) */}
                 <Container component="main" maxWidth="sm" sx={{ bgcolor: 'white', borderRadius: 2, p: 3, boxShadow: 3 }}>
                     <CssBaseline />
                     <Box sx={{ marginTop: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -202,7 +180,6 @@ const RegisterPage = () => {
                                 <Grid item xs={12} sm={6}><TextField name="first_name" required fullWidth label="Primeiro Nome" value={formData.first_name} onChange={handleFormChange} /></Grid>
                                 <Grid item xs={12} sm={6}><TextField name="last_name" required fullWidth label="Sobrenome" value={formData.last_name} onChange={handleFormChange} /></Grid>
                                 
-                                {/* EMAIL com validação */}
                                 <Grid item xs={12}>
                                     <TextField 
                                         name="email" 
@@ -217,7 +194,6 @@ const RegisterPage = () => {
                                     />
                                 </Grid>
                                 
-                                {/* SENHA com validação */}
                                 <Grid item xs={12}>
                                     <TextField 
                                         name="password" 
@@ -235,7 +211,6 @@ const RegisterPage = () => {
                                     />
                                 </Grid>
                                 
-                                {/* CONFIRMAR SENHA com validação */}
                                 <Grid item xs={12}>
                                     <TextField 
                                         name="confirmPassword" 
@@ -266,7 +241,6 @@ const RegisterPage = () => {
                                 {formData.role === 'company_admin' ? (
                                     <>
                                         <Grid item xs={12}><TextField name="company_name" required fullWidth label="Nome da Empresa" value={formData.company_name} onChange={handleFormChange} /></Grid>
-                                        {/* CNPJ com MÁSCARA */}
                                         <Grid item xs={12}>
                                             <TextField 
                                                 name="company_cnpj" 
@@ -274,10 +248,10 @@ const RegisterPage = () => {
                                                 fullWidth 
                                                 label="CNPJ da Empresa (00.000.000/0000-00)" 
                                                 value={formData.company_cnpj} 
-                                                onChange={handleDocumentChange} // USA O NOVO HANDLER
+                                                onChange={handleDocumentChange}
                                                 error={!!formErrors.company_cnpj}
                                                 helperText={formErrors.company_cnpj}
-                                                inputProps={{ maxLength: 18 }} // Limita a entrada formatada
+                                                slotProps={{ htmlInput: { maxLength: 18 } }} 
                                             />
                                         </Grid>
                                         <Grid item xs={12}><TextField name="company_address" required fullWidth label="Endereço da Empresa" value={formData.company_address} onChange={handleFormChange} /></Grid>
@@ -285,7 +259,6 @@ const RegisterPage = () => {
                                 ) : (
                                     <>
                                         <Grid item xs={12}><TextField name="provider_name" required fullWidth label="Nome do Fornecedor" value={formData.provider_name} onChange={handleFormChange} /></Grid>
-                                         {/* CNPJ/CPF com MÁSCARA */}
                                         <Grid item xs={12}>
                                             <TextField 
                                                 name="provider_cnpj" 
@@ -293,10 +266,10 @@ const RegisterPage = () => {
                                                 fullWidth 
                                                 label="Documento Federal (CNPJ/CPF)" 
                                                 value={formData.provider_cnpj} 
-                                                onChange={handleDocumentChange} // USA O NOVO HANDLER
+                                                onChange={handleDocumentChange}
                                                 error={!!formErrors.provider_cnpj}
                                                 helperText={formErrors.provider_cnpj}
-                                                inputProps={{ maxLength: 18 }} // Limita a entrada formatada
+                                                slotProps={{ htmlInput: { maxLength: 18 } }}
                                             />
                                         </Grid>
                                         <Grid item xs={12}><TextField name="provider_address" required fullWidth label="Endereço do Fornecedor" value={formData.provider_address} onChange={handleFormChange} /></Grid>
