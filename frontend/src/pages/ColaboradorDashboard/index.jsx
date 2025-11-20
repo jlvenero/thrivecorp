@@ -11,7 +11,7 @@ import {
     Alert,
     CircularProgress,
     Divider,
-    useTheme // Import useTheme
+    useTheme
 } from '@mui/material';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'; // Ícone para academias
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Ícone para check-in
@@ -76,7 +76,7 @@ const ColaboradorDashboard = () => {
         setDialogConfig({
             title: 'Confirmar Check-in',
             message: `Você confirma o check-in na academia "${gymName}"?`,
-            onConfirm: () => handleCheckIn(gymId, gymName)
+            onConfirm: () => { handleCheckIn(gymId, gymName) }
         });
         setDialogOpen(true);
     };
