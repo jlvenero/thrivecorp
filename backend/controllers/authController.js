@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const logger = require('../utils/logger');
 
 async function login(req, res) {
     const { email, password } = req.body;
@@ -58,7 +59,11 @@ async function submitRegistrationRequest(req, res) {
         });
         res.status(201).json({ message: 'Registro enviado com sucesso! Aguarde a aprovação.', id: newUserId });
     } catch (error) {
-        console.error("Erro no registro:", error);
+        logger.error("Falha ao registrar usuário", { 
+            action: 'register_attempt',
+            email: req.body.email,
+            error: error.message 
+        });
         if (error.message === 'E-mail já cadastrado.') {
             return res.status(409).json({ error: 'Este e-mail já está cadastrado no sistema.' });
         }

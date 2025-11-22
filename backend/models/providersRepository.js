@@ -214,7 +214,6 @@ async function approveGym(id) {
 }
 
 async function getProviderByUserId(userId) {
-    console.log('Repositório: Buscando prestador para userId:', userId);
     const connection = await mysql.createConnection(dbConfig);
     const [rows] = await connection.execute(
         'SELECT * FROM providers WHERE user_id = ?',
