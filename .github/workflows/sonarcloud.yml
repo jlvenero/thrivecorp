@@ -74,4 +74,3 @@ jobs:
             -Dsonar.sources=backend,frontend
             -Dsonar.exclusions=**/*.test.js,**/*.test.jsx,**/node_modules/**,**/dist/**
             -Dsonar.javascript.lcov.reportPaths=**/coverage/lcov.info
-            sonar.coverage.exclusions=**/node_modules/**,**/*.test.js,**/*.spec.js,backend/server.js,backend/routes/**,backend/jest.config.js
