@@ -1,5 +1,13 @@
 const companiesController = require('./companiesController');
 const companiesRepository = require('../models/companiesRepository');
+const logger = require('../utils/logger'); // Importar para poder verificar se foi chamado
+
+// 1. MOCK DO LOGGER (Essencial para não quebrar e não sujar o terminal)
+jest.mock('../utils/logger', () => ({
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+}));
 
 // Mock do repositório
 jest.mock('../models/companiesRepository');
@@ -7,22 +15,14 @@ jest.mock('../models/companiesRepository');
 describe('Companies Controller', () => {
     let req, res;
 
-    // Silenciar logs durante os testes
-    beforeAll(() => {
-        jest.spyOn(console, 'error').mockImplementation(() => {});
-        jest.spyOn(console, 'log').mockImplementation(() => {});
-    });
-
-    afterAll(() => {
-        console.error.mockRestore();
-        console.log.mockRestore();
-    });
-
     beforeEach(() => {
         jest.clearAllMocks();
         req = {
             body: {},
-            params: {}
+            params: {},
+            // 2. ADICIONADO O USUÁRIO MOCKADO
+            // Isso corrige o erro 500. O controller precisa disso para o log de auditoria (adminId: req.user.userId)
+            user: { userId: 1, role: 'admin', email: 'admin@thrive.com' } 
         };
         res = {
             status: jest.fn().mockReturnThis(),
@@ -57,6 +57,8 @@ describe('Companies Controller', () => {
             await companiesController.createCompany(req, res);
 
             expect(res.status).toHaveBeenCalledWith(500);
+            // Verifica se o erro foi logado corretamente
+            expect(logger.error).toHaveBeenCalled();
             expect(res.json).toHaveBeenCalledWith({ error: 'Erro ao solicitar registro da empresa.' });
         });
     });
@@ -91,6 +93,7 @@ describe('Companies Controller', () => {
             await companiesController.getCompany(req, res);
 
             expect(res.status).toHaveBeenCalledWith(500);
+            expect(logger.error).toHaveBeenCalled();
             expect(res.json).toHaveBeenCalledWith({ error: 'Erro ao buscar a empresa.' });
         });
     });
@@ -113,6 +116,7 @@ describe('Companies Controller', () => {
             await companiesController.getAllCompanies(req, res);
 
             expect(res.status).toHaveBeenCalledWith(500);
+            expect(logger.error).toHaveBeenCalled();
             expect(res.json).toHaveBeenCalledWith({ error: 'Erro ao buscar a lista de empresas.' });
         });
     });
@@ -146,12 +150,13 @@ describe('Companies Controller', () => {
             await companiesController.deleteCompany(req, res);
 
             expect(res.status).toHaveBeenCalledWith(500);
+            expect(logger.error).toHaveBeenCalled();
             expect(res.json).toHaveBeenCalledWith({ error: 'Erro ao excluir a empresa.' });
         });
     });
 
     describe('approveCompany', () => {
-        it('deve aprovar empresa com sucesso (200)', async () => {
+        it('deve aprovar empresa e gerar log de auditoria (200)', async () => {
             req.params.id = 1;
             companiesRepository.approveCompany.mockResolvedValue(true);
 
@@ -160,6 +165,16 @@ describe('Companies Controller', () => {
             expect(companiesRepository.approveCompany).toHaveBeenCalledWith(1);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ message: 'Empresa e usuário associado aprovados com sucesso.' });
+            
+            // Validação Extra: Garante que o log de auditoria foi chamado com o adminId correto
+            expect(logger.info).toHaveBeenCalledWith(
+                'Empresa aprovada com sucesso',
+                expect.objectContaining({ 
+                    action: 'company_approval',
+                    companyId: 1,
+                    adminId: 1 // Vem do req.user.userId
+                })
+            );
         });
 
         it('deve retornar 404 se não encontrar para aprovar', async () => {
@@ -179,6 +194,7 @@ describe('Companies Controller', () => {
             await companiesController.approveCompany(req, res);
 
             expect(res.status).toHaveBeenCalledWith(500);
+            expect(logger.error).toHaveBeenCalled(); // Verifica se logou o erro
             expect(res.json).toHaveBeenCalledWith({ error: 'Erro ao aprovar a empresa.' });
         });
     });

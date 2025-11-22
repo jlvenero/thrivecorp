@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+const logger = require('./utils/logger');
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -47,10 +48,14 @@ app.use(express.json());
 async function testDbConnection() {
   try {
     const connection = await mysql.createConnection(dbConfig);
-    console.log('✅ Conexão com o banco de dados estabelecida!');
+    logger.info('Conexão com o banco de dados estabelecida', { component: 'db' });
     connection.end();
   } catch (error) {
-    console.error('❌ Erro na conexão com o banco de dados:', error.message);
+    logger.error('Falha na conexão com o banco', { 
+        component: 'db', 
+        error: error.message,
+        stack: error.stack
+    });
   }
 }
 
@@ -81,7 +86,6 @@ app.get('/', (req, res) => {
   res.send('🚀 API ThriveCorp está funcionando!');
 });
 
-// Inicializa o servidor
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+  logger.info('Servidor iniciado', { port: process.env.PORT, env: process.env.NODE_ENV });
 });

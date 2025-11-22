@@ -1,5 +1,6 @@
 const providersRepository = require('../models/providersRepository');
 const plansRepository = require('../models/plansRepository');
+const logger = require('../utils/logger');
 
 async function registerProvider(req, res) {
     const { user_id, name, cnpj } = req.body;
@@ -179,6 +180,11 @@ async function reproveGym(req, res) {
     try {
         const success = await providersRepository.reproveGymAndDeactivateProvider(id);
         if (success) {
+            logger.warn('Academia reprovada e removida', {
+            action: 'gym_rejection',
+            gymId: req.params.id,
+            adminId: req.user.userId
+});
             res.status(200).json({ message: 'Academia reprovada e usuário desativado com sucesso.' });
         } else {
             res.status(404).json({ message: 'Academia não encontrada para reprovação.' });

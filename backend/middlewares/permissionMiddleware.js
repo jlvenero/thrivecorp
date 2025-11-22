@@ -1,4 +1,5 @@
 const providersRepository = require('../models/providersRepository');
+const logger = require('../utils/logger');
 
 async function checkGymDeletePermission(req, res, next) {
     const { id } = req.params;
@@ -6,11 +7,9 @@ async function checkGymDeletePermission(req, res, next) {
     const userRole = req.user.role;
 
     try {
-        console.log('--- Iniciando verificação de permissão ---');
         console.log(`Dados do Token: userId=${userId}, userRole=${userRole}`);
         
         const gym = await providersRepository.getGymById(id);
-        console.log('Dados da Academia:', gym);
 
         if (!gym) {
             return res.status(404).json({ message: 'Academia não encontrada.' });
@@ -33,7 +32,13 @@ async function checkGymDeletePermission(req, res, next) {
             }
         }
 
-        console.log('Acesso negado. Nenhuma condição foi atendida.');
+        logger.warn('Acesso negado: tentativa de deletar academia sem permissão',
+            {
+                userRole: userRole,
+                userId: userId,
+                gymId: id
+            }
+        );
         res.status(403).json({ message: 'Acesso negado. Você não tem permissão para deletar esta academia.' });
 
     } catch (error) {
