@@ -1,12 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const responseTime = require('response-time');
 require('dotenv').config();
 const logger = require('./utils/logger');
 
+const { register, httpRequestDurationMicroseconds } = require('./utils/metrics');
+
 const app = express();
 const port = process.env.PORT || 8080;
-// Configuração do banco
+
 const dbConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -26,7 +29,7 @@ const allowedOrigins = [
   'https://api.thrivecorp.click',
   'https://thrivecorp.click', // ambiente local
 ];
-//teste
+
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -43,7 +46,27 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));// 👈 ESSENCIAL: habilita o preflight
 app.use(express.json());
-//teste
+
+app.use(responseTime((req, res, time) => {
+    if (req.path === '/metrics') return;
+
+    const route = req.route ? req.route.path : req.path;
+
+    httpRequestDurationMicroseconds.observe(
+        {
+            method: req.method,
+            route: route,
+            code: res.statusCode
+        },
+        time / 1000
+    );
+}));
+
+app.get('/metrics', async (req, res) => {
+    res.setHeader('Content-Type', register.contentType);
+    res.send(await register.metrics());
+});
+
 // Conexão com o banco
 async function testDbConnection() {
   try {
