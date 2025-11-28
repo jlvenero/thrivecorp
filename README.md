@@ -44,3 +44,6 @@ O projeto adota o modelo C4 de arquitetura e segue o padrão MVC (Model-View-Con
 
 * **Segurança:** Controle de acesso baseado em papéis (RBAC) via middlewares.
 * **Organização:** Estrutura de monorepo (`backend/` e `frontend/`).
+
+## SonarCloud:
+https://sonarcloud.io/project/overview?id=jlvenero_thrivecorp
