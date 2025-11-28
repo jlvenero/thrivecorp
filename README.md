@@ -1,10 +1,10 @@
-# ThriveCorp - Plataforma de Gestão de Benefícios Corporativos
+# ThriveCorp - Plataforma de Beneficio Empresarial Voltado a saude
 
 ![Build Status](https://github.com/jlvenero/thrivecorp/actions/workflows/deploy-backend.yml/badge.svg)
 ![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=jlvenero_thrivecorp&metric=coverage)
 ![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jlvenero_thrivecorp&metric=alert_status)
 
-## 📖 Sobre o Projeto
+## Sobre o Projeto
 
 O **ThriveCorp** é uma plataforma web desenvolvida para intermediar o benefício de atividade física entre empresas, colaboradores e academias. O sistema permite que empresas subsidiem o acesso de seus funcionários a uma rede de academias parceiras.
 
@@ -12,7 +12,7 @@ Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso / Di
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 O sistema segue uma arquitetura moderna, separando Frontend e Backend, com práticas de CI/CD e monitoramento.
 
