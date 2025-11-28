@@ -6,9 +6,9 @@
 
 ## 📖 Sobre o Projeto
 
-O **ThriveCorp** é uma plataforma web desenvolvida para intermediar o benefício de atividade física entre empresas, colaboradores e academias (modelo similar ao GymPass/TotalPass). O sistema permite que empresas subsidiem o acesso de seus funcionários a uma rede de academias parceiras.
+O **ThriveCorp** é uma plataforma web desenvolvida para intermediar o benefício de atividade física entre empresas, colaboradores e academias. O sistema permite que empresas subsidiem o acesso de seus funcionários a uma rede de academias parceiras.
 
-Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso / Disciplina de [Nome da Disciplina] do curso de [Nome do Curso].
+Este projeto foi desenvolvido como parte do Trabalho de Conclusão de Curso / Disciplina de Portfólio do curso de Engenharia de Software.
 
 ---
 
