@@ -14,7 +14,6 @@ describe('ConfirmationDialog Component', () => {
                 onConfirm={() => {}} 
             />
         );
-        // queryByText retorna null se não encontrar (o que esperamos aqui)
         expect(screen.queryByText('Título Teste')).not.toBeInTheDocument();
     });
 
