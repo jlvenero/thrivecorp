@@ -34,7 +34,7 @@ O sistema segue uma arquitetura moderna, separando Frontend e Backend, com prát
 * **AWS S3 + CloudFront:** Hospedagem estática e CDN do Frontend.
 * **GitHub Actions:** Pipelines de CI/CD automatizados.
 * **SonarCloud:** Análise estática de código e cobertura de testes.
-* **Grafana Cloud + Alloy:** Monitoramento e observabilidade.
+* **Grafana:** Monitoramento.
 
 ---
 
@@ -47,3 +47,24 @@ O projeto adota o modelo C4 de arquitetura e segue o padrão MVC (Model-View-Con
 
 ## SonarCloud:
 https://sonarcloud.io/project/overview?id=jlvenero_thrivecorp
+
+## Registro de usuário:
+Para um novo usuário poder ser registrado, ele faz uma solicitação de registro para o Admin da PLATAFORMA.
+Após o mesmo aceitar, este novo usuário passa a poder a acessar a plataforma ThriveCorp
+
+## Contas existentes para acessar a plataforma
+Usuário: Admin thriveCorp
+Login: admin@thrivecorp.com
+Senha: 161103Lu#
+
+Usuário: Empresa
+Login: Empresa@lorz.com
+Senha: Senha@123
+
+Usuário: Colaborador
+Login: MatsGabr@gmail.com
+Senha: Senha@123
+
+Usuário: Academia
+Login: Smart@fit.com
+Senha: Senha@123
