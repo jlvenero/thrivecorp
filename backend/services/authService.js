@@ -10,7 +10,6 @@ async function validateCredentialsAndGenerateToken(email, password) {
     const user = await userRepository.findByEmail(email);
 
     if (!user) {
-        // Log de segurança: Alguém tentou logar com um email que não existe
         logger.warn('Tentativa de login com e-mail inexistente', { email });
         return null;
     }

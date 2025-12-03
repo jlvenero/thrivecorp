@@ -7,7 +7,6 @@ import RegisterPage from './index'; // Ajuste o caminho se necessário
 // 1. Mocks
 vi.mock('axios');
 
-// Mock do navigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
