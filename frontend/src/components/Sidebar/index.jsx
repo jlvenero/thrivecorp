@@ -24,7 +24,7 @@ const Sidebar = ({ onLogout }) => {
   const userRole = localStorage.getItem('userRole');
 
   const navItems = [
-    { text: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, roles: ['thrive_admin', 'company_admin', 'provider', 'collaborator'] },
+    { text: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, roles: ['thrive_admin', 'collaborator'] },
     { text: 'Alterar Senha', path: '/change-password', icon: <LockResetIcon />, roles: ['thrive_admin', 'company_admin', 'provider', 'collaborator'] },
     { text: 'Aprovar Empresas', path: '/admin/empresas', icon: <BusinessIcon />, roles: ['thrive_admin'] },
     { text: 'Aprovar Academias', path: '/admin/academias', icon: <FitnessCenterIcon />, roles: ['thrive_admin'] },

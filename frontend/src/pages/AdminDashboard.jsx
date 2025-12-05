@@ -26,7 +26,6 @@ const AdminDashboard = () => {
         }
     };
 
-    // Função para aprovar uma empresa
     const handleApprove = async (companyId) => {
         try {
             const token = localStorage.getItem('token');
@@ -35,7 +34,6 @@ const AdminDashboard = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            // Após a aprovação, atualiza a lista de empresas
             fetchCompanies();
         } catch (err) {
             setError('Falha ao aprovar a empresa.');
@@ -43,7 +41,6 @@ const AdminDashboard = () => {
         }
     };
 
-    // O useEffect é chamado uma vez quando o componente é montado
     useEffect(() => {
         fetchCompanies();
     }, []);

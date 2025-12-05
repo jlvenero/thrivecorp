@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../apiConfig'
 
-// Importações do Material-UI
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {
     Box, TextField, Button, Typography, Container, InputAdornment,
@@ -12,13 +11,12 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// TEMA LOCAL: Definindo a cor principal com o valor desejado (#1e293b)
 const BLUE_COLOR = '#1e293b';
 
 const localTheme = createTheme({
   palette: {
     primary: {
-      main: BLUE_COLOR, // Aplicando #1e293b
+      main: BLUE_COLOR,
     },
   },
   typography: {
@@ -26,7 +24,7 @@ const localTheme = createTheme({
     button: {
       textTransform: 'none',
       fontWeight: 'bold',
-      color: 'white', // FORÇA O TEXTO DO BOTÃO A SER BRANCO
+      color: 'white',
     },
   },
 });
@@ -39,14 +37,11 @@ const LogoIcon = () => (
 );
 
 const maskDocument = (value) => {
-    // 1. Limpa o valor (mantém apenas números)
     let cleanedValue = value.replace(/\D/g, '');
 
-    // 2. Limita o tamanho (máximo 14 para CNPJ)
     cleanedValue = cleanedValue.substring(0, 14);
 
     if (cleanedValue.length <= 11) {
-        // CPF (11 dígitos): 000.000.000-00
         return cleanedValue
             .replace(/(\d{3})(\d)/, '$1.$2')
             .replace(/(\d{3})(\d)/, '$1.$2')

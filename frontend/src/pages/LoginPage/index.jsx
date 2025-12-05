@@ -71,7 +71,6 @@ const LoginPage = () => {
   const handleMouseDownPassword = (event) => event.preventDefault();
 
   return (
-    // Aplicação do tema local
     <ThemeProvider theme={localTheme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline /> 

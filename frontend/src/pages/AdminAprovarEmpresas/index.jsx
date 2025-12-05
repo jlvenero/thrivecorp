@@ -1,5 +1,3 @@
-// src/pages/AdminAprovarEmpresas/index.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -14,7 +12,6 @@ import BusinessIcon from '@mui/icons-material/Business';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { API_URL } from '../../apiConfig'
 
-// Componente StatusChip (sem alterações)
 const StatusChip = ({ status }) => {
     let colors = { bg: 'default', border: 'default' };
     let label = status;
@@ -44,14 +41,13 @@ const StatusChip = ({ status }) => {
 
 const AdminAprovarEmpresas = () => {
     const [companies, setCompanies] = useState([]);
-    const [loading, setLoading] = useState(true); // Inicia como true
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogConfig, setDialogConfig] = useState({ title: '', message: '', onConfirm: () => {} });
 
-    // ESTE BLOCO ESTAVA FALTANDO, CAUSANDO O ERRO DA TELA VAZIA
     const fetchCompanies = async () => {
         setLoading(true);
         setError(null);
@@ -71,10 +67,9 @@ const AdminAprovarEmpresas = () => {
     useEffect(() => {
         fetchCompanies();
     }, []);
-    // FIM DO BLOCO CORRIGIDO
 
     const handleApprove = async (companyId) => {
-        setDialogOpen(false); // Fecha o modal primeiro
+        setDialogOpen(false);
         try {
             const token = localStorage.getItem('token');
             await axios.put(`${API_URL}/api/companies/${companyId}/approve`, {}, { headers: { Authorization: `Bearer ${token}` } });
