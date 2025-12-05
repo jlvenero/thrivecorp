@@ -6,8 +6,20 @@ import AdminBillingReport from './index';
 vi.mock('axios');
 vi.mock('../../apiConfig', () => ({ API_URL: 'http://localhost:3000' }));
 
-global.URL.createObjectURL = vi.fn(() => 'mock-blob-url');
-global.URL.revokeObjectURL = vi.fn();
+// MOCK ROBUSTO DE URL (Window + Global)
+const mockCreateObjectURL = vi.fn(() => 'mock-blob-url');
+const mockRevokeObjectURL = vi.fn();
+
+// Aplica o mock tanto no global quanto no window para garantir que o JSDOM pegue
+Object.defineProperty(window, 'URL', {
+  writable: true,
+  value: {
+    createObjectURL: mockCreateObjectURL,
+    revokeObjectURL: mockRevokeObjectURL,
+  },
+});
+global.URL.createObjectURL = mockCreateObjectURL;
+global.URL.revokeObjectURL = mockRevokeObjectURL;
 
 vi.mock('../../components/ConfirmationDialog', () => ({
   default: ({ open, title, onConfirm }) => {
@@ -35,6 +47,10 @@ describe('AdminBillingReport Component', () => {
     beforeEach(() => {
         Storage.prototype.getItem = vi.fn(() => mockToken);
         vi.clearAllMocks();
+        // Limpa especificamente o mock da URL entre testes
+        mockCreateObjectURL.mockClear();
+        mockRevokeObjectURL.mockClear();
+
         axios.get.mockImplementation((url) => {
             if (url.includes('/companies')) return Promise.resolve({ data: mockCompanies });
             if (url.includes('/billing-report')) return Promise.resolve({ data: mockReport });
@@ -66,6 +82,28 @@ describe('AdminBillingReport Component', () => {
         expect(screen.getByText('Pendente')).toBeInTheDocument();
     });
 
+    it('deve filtrar por empresa', async () => {
+        render(<AdminBillingReport />);
+        await waitFor(() => screen.getByText('Empresa A'));
+
+        // Pega o terceiro Select da tela (Mês[0], Ano[1], Empresa[2])
+        const selects = screen.getAllByRole('combobox');
+        const empresaSelect = selects[2]; 
+        
+        fireEvent.mouseDown(empresaSelect);
+        
+        const optionB = await screen.findByRole('option', { name: 'Empresa B' });
+        fireEvent.click(optionB);
+
+        // Verifica elementos filtrados
+        const empresaBTexts = screen.getAllByText('Empresa B');
+        expect(empresaBTexts.length).toBeGreaterThanOrEqual(1);
+
+        // Verifica que Empresa A sumiu da tabela
+        expect(screen.queryByRole('cell', { name: 'Empresa A' })).not.toBeInTheDocument();
+        expect(screen.getByText(/TOTAL \(1 empresa\)/)).toBeInTheDocument();
+    });
+
     it('deve abrir modal e atualizar status ao confirmar', async () => {
         axios.post.mockResolvedValue({});
 
@@ -90,6 +128,45 @@ describe('AdminBillingReport Component', () => {
                 expect.anything()
             );
         });
+    });
+
+    it('deve gerar e baixar o CSV ao clicar em Exportar', async () => {
+        render(<AdminBillingReport />);
+        await waitFor(() => screen.getByText('Empresa A'));
+
+        // Mock para o elemento 'a' criado dinamicamente
+        const linkSpy = { 
+            click: vi.fn(), 
+            setAttribute: vi.fn(), 
+            style: {},
+            download: '' // Propriedade necessária para o teste de feature detection
+        };
+        
+        // Salva a função original para não quebrar outros createElement
+        const originalCreateElement = document.createElement.bind(document);
+        
+        // Espiona a criação do elemento
+        const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
+            if (tagName === 'a') return linkSpy;
+            return originalCreateElement(tagName); 
+        });
+        
+        vi.spyOn(document.body, 'appendChild').mockImplementation(() => {});
+        vi.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+
+        const exportBtn = screen.getByText('Exportar CSV');
+        
+        // Garante que o botão está habilitado antes de clicar
+        expect(exportBtn).not.toBeDisabled();
+        
+        fireEvent.click(exportBtn);
+
+        expect(mockCreateObjectURL).toHaveBeenCalled();
+        expect(linkSpy.setAttribute).toHaveBeenCalledWith('download', expect.stringContaining('relatorio-faturamento'));
+        expect(linkSpy.click).toHaveBeenCalled();
+        expect(mockRevokeObjectURL).toHaveBeenCalled();
+        
+        createElementSpy.mockRestore();
     });
 
     it('deve exibir erro ao tentar exportar sem dados', async () => {
@@ -132,6 +209,31 @@ describe('AdminBillingReport Component', () => {
 
         await waitFor(() => {
             expect(screen.getByText('Erro ao atualizar')).toBeInTheDocument();
+        });
+    });
+
+    it('deve recarregar o relatório ao mudar o ano', async () => {
+        render(<AdminBillingReport />);
+        await waitFor(() => screen.getByText('Empresa A'));
+
+        axios.get.mockClear();
+        axios.get.mockResolvedValue({ data: mockReport });
+
+        const selects = screen.getAllByRole('combobox');
+        const yearSelect = selects[1]; 
+
+        fireEvent.mouseDown(yearSelect);
+        
+        const yearOption = await screen.findByRole('option', { name: (new Date().getFullYear() - 1).toString() });
+        fireEvent.click(yearOption);
+
+        await waitFor(() => {
+            expect(axios.get).toHaveBeenCalledWith(
+                expect.stringContaining('/billing-report'),
+                expect.objectContaining({
+                    params: expect.objectContaining({ year: new Date().getFullYear() - 1 })
+                })
+            );
         });
     });
 
