@@ -25,7 +25,6 @@ const ChangePasswordPage = () => {
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Estados para controlar a visibilidade das senhas
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,7 +43,7 @@ const ChangePasswordPage = () => {
             return;
         }
 
-        if (formData.newPassword.length < 3) { // Exemplo de validação simples
+        if (formData.newPassword.length < 3) {
             setError('A nova senha deve ter pelo menos 3 caracteres.');
             return;
         }

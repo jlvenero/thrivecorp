@@ -11,7 +11,6 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { API_URL } from '../../apiConfig'
 
-// Componente para o status (reutilizado da outra tela)
 const StatusChip = ({ status }) => {
     let colors = { bg: 'default', border: 'default' };
     let label = status;
@@ -41,7 +40,6 @@ const StatusChip = ({ status }) => {
 
 
 const AdminAprovarAcademias = () => {
-    // 1. State alterado para 'gyms'
     const [gyms, setGyms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -50,7 +48,6 @@ const AdminAprovarAcademias = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogConfig, setDialogConfig] = useState({ title: '', message: '', onConfirm: () => {} });
 
-    // 2. Função de busca de dados alterada para o endpoint de academias
     const fetchGyms = async () => {
         setLoading(true);
         setError(null);
@@ -88,8 +85,7 @@ const AdminAprovarAcademias = () => {
             fetchGyms();
         } catch (err) { setError('Falha ao reprovar a academia.'); }
     };
-    
-    // 3. Lógica do modal adaptada para academias
+
     const openConfirmationDialog = (gymId, action) => {
         let config = {};
         switch (action) {
@@ -113,7 +109,6 @@ const AdminAprovarAcademias = () => {
         setDialogOpen(true);
     };
 
-    // 4. Lógica de filtro adaptada para academias (nome e endereço)
     const filteredGyms = gyms.filter(gym =>
         gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         gym.address.toLowerCase().includes(searchTerm.toLowerCase())
@@ -123,7 +118,6 @@ const AdminAprovarAcademias = () => {
 
     return (
         <>
-            {/* 5. Título e ícone da página atualizados */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 <FitnessCenterIcon sx={{ color: 'primary.main', fontSize: '2.5rem' }} />
                 <Typography variant="h5">Aprovar Academias</Typography>
@@ -154,7 +148,6 @@ const AdminAprovarAcademias = () => {
                 <TableContainer>
                     <Table sx={{ '& .MuiTableCell-root': { borderBottom: 'none' } }}>
                         <TableHead>
-                            {/* 6. Colunas da tabela atualizadas */}
                             <TableRow sx={{ '& .MuiTableCell-head': { color: 'text.secondary', fontWeight: '600' } }}>
                                 <TableCell>Academia</TableCell>
                                 <TableCell>Endereço</TableCell>

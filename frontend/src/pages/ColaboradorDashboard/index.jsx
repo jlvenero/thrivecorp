@@ -13,30 +13,29 @@ import {
     Divider,
     useTheme
 } from '@mui/material';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter'; // Ícone para academias
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Ícone para check-in
-import ConfirmationDialog from '../../components/ConfirmationDialog'; // Reutilizar o diálogo de confirmação
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { API_URL } from '../../apiConfig'
 
 const ColaboradorDashboard = () => {
     const [gyms, setGyms] = useState([]);
-    const [loading, setLoading] = useState(true); // Iniciar como true
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogConfig, setDialogConfig] = useState({ title: '', message: '', onConfirm: () => {} });
-    const theme = useTheme(); // Obter o tema
+    const theme = useTheme();
 
     const fetchGyms = async () => {
         setLoading(true);
         setError(null);
-        setSuccessMessage(''); // Limpar mensagem de sucesso ao recarregar
+        setSuccessMessage('');
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(`${API_URL}/api/collaborator/gyms`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Filtrar academias ativas (se a API não fizer isso)
             setGyms(response.data.filter(gym => gym.status === 'active'));
         } catch (err) {
             setError('Falha ao buscar as academias disponíveis.');
@@ -51,10 +50,10 @@ const ColaboradorDashboard = () => {
     }, []);
 
     const handleCheckIn = async (gymId, gymName) => {
-        setDialogOpen(false); // Fechar diálogo antes de processar
+        setDialogOpen(false);
         setError('');
         setSuccessMessage('');
-        setLoading(true); // Mostrar loading durante a requisição
+        setLoading(true);
 
         try {
             const token = localStorage.getItem('token');
@@ -67,11 +66,10 @@ const ColaboradorDashboard = () => {
             setError(err.response?.data?.error || 'Falha ao realizar o check-in. Tente novamente.');
             console.error(err);
         } finally {
-            setLoading(false); // Esconder loading
+            setLoading(false);
         }
     };
 
-    // Função para abrir o diálogo de confirmação
     const openCheckInDialog = (gymId, gymName) => {
         setDialogConfig({
             title: 'Confirmar Check-in',
@@ -108,15 +106,15 @@ const ColaboradorDashboard = () => {
                                     secondaryAction={
                                         <Button
                                             variant="contained"
-                                            color="primary" // Cor primária do tema
+                                            color="primary" 
                                             startIcon={<CheckCircleOutlineIcon />}
                                             onClick={() => openCheckInDialog(gym.id, gym.name)}
-                                            sx={{ borderRadius: '8px', fontWeight: 'bold' }} // Estilo do botão
+                                            sx={{ borderRadius: '8px', fontWeight: 'bold' }} 
                                         >
                                             Fazer Check-in
                                         </Button>
                                     }
-                                    sx={{ py: 2, px: 3 }} // Padding interno do item da lista
+                                    sx={{ py: 2, px: 3 }} 
                                 >
                                     <ListItemText
                                         primary={

@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';

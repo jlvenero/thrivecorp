@@ -132,7 +132,6 @@ const CompanyAdminDashboard = () => {
         setDialogConfig({
             title: 'Desativar Colaborador',
             message: 'Tem certeza que deseja desativar este colaborador? Ele perderá o acesso imediatamente.',
-            // CORREÇÃO 1: Adicionadas chaves {} para evitar retorno de Promise implícito
             onConfirm: () => { handleDeactivate(collaboratorId); }
         });
         setDialogOpen(true);
@@ -148,7 +147,6 @@ const CompanyAdminDashboard = () => {
                 responseType: 'blob',
             });
 
-            // CORREÇÃO 2: Uso de URL global ao invés de window.URL
             const url = URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;

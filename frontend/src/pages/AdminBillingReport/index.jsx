@@ -5,14 +5,13 @@ import {
     TableHead, TableRow, Chip, IconButton, Tooltip, Alert, CircularProgress,
     Select, MenuItem, FormControl, InputLabel, Button
 } from '@mui/material';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'; // Ícone da página
-import DownloadIcon from '@mui/icons-material/Download';      // Ícone de Download
-import MarkChatReadIcon from '@mui/icons-material/MarkChatRead'; // Ícone para Marcar como Faturado
-import MarkChatUnreadIcon from '@mui/icons-material/MarkChatUnread'; // Ícone para Marcar como Pendente
-import ConfirmationDialog from '../../components/ConfirmationDialog'; // Reutilizar o diálogo
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import DownloadIcon from '@mui/icons-material/Download';
+import MarkChatReadIcon from '@mui/icons-material/MarkChatRead';
+import MarkChatUnreadIcon from '@mui/icons-material/MarkChatUnread';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 import { API_URL } from '../../apiConfig'
 
-// Componente StatusChip adaptado para esta tela
 const StatusChip = ({ status }) => {
     let colors = { bg: 'default', border: 'default' };
     let label = status;
@@ -35,7 +34,7 @@ const StatusChip = ({ status }) => {
             backgroundColor: colors.bg,
             borderColor: colors.border,
             color: colors.border,
-            minWidth: '80px', // Garante largura mínima
+            minWidth: '80px',
              '& .MuiChip-label': { px: '4px' }
         }}
     />;
@@ -44,7 +43,7 @@ const StatusChip = ({ status }) => {
 const AdminBillingReport = () => {
     const [report, setReport] = useState([]);
     const [companies, setCompanies] = useState([]);
-    const [loading, setLoading] = useState(true); // Iniciar como true
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogConfig, setDialogConfig] = useState({ title: '', message: '', onConfirm: () => {} });
@@ -55,10 +54,9 @@ const AdminBillingReport = () => {
     });
     const [selectedCompany, setSelectedCompany] = useState('all');
 
-    // Busca o relatório principal
     const fetchReport = async () => {
         setLoading(true);
-        setError(null); // Limpa erro anterior
+        setError(null);
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(`${API_URL}/api/accesses/billing-report`, {
@@ -74,31 +72,26 @@ const AdminBillingReport = () => {
         }
     };
 
-    // Busca a lista de empresas para o filtro
     const fetchCompanies = async () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get(`${API_URL}/api/companies`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Filtra apenas empresas ativas para o select
             setCompanies(response.data.filter(c => c.status === 'active'));
         } catch (err) {
             console.error("Falha ao buscar empresas para o filtro:", err);
-            // Não define erro principal aqui para não atrapalhar o relatório
         }
     };
 
-     // Efeito para buscar dados iniciais
      useEffect(() => {
         fetchCompanies();
         fetchReport();
-    }, []); // Executa apenas na montagem inicial
+    }, []);
 
-    // Efeito para re-buscar o relatório quando a data muda
     useEffect(() => {
         fetchReport();
-    }, [selectedDate]); // Executa quando selectedDate muda
+    }, [selectedDate]);
 
 
     const handleDateChange = (e) => {
@@ -110,28 +103,25 @@ const AdminBillingReport = () => {
         setSelectedCompany(e.target.value);
     };
 
-    // Função unificada para atualizar o status
     const handleUpdateStatus = async (companyId, newStatus) => {
-        setDialogOpen(false); // Fecha o diálogo
-        setError(null); // Limpa erro anterior
+        setDialogOpen(false);
+        setError(null);
         try {
             const token = localStorage.getItem('token');
-            // Chama a nova rota do backend
             await axios.post(`${API_URL}/api/admin/billing/status`, {
                 companyId,
                 year: selectedDate.year,
                 month: selectedDate.month,
-                status: newStatus // Envia o status desejado
+                status: newStatus
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            fetchReport(); // Atualiza a lista para mostrar o novo status
+            fetchReport();
         } catch (err) {
             setError(err.response?.data?.error || 'Falha ao atualizar o status.');
         }
     };
 
-    // Função para abrir o diálogo de confirmação
     const openConfirmationDialog = (companyId, currentStatus) => {
         const isCurrentlySent = currentStatus === 'sent';
         const newStatus = isCurrentlySent ? 'pending' : 'sent';
@@ -141,23 +131,21 @@ const AdminBillingReport = () => {
         setDialogConfig({
             title: titleText,
             message: `Tem certeza que deseja ${actionText} para esta empresa no período selecionado?`,
-            onConfirm: () => handleUpdateStatus(companyId, newStatus) // Passa o novo status
+            onConfirm: () => handleUpdateStatus(companyId, newStatus)
         });
         setDialogOpen(true);
     };
 
 
     const handleDownload = () => {
-        setError(null); // Limpa erro anterior
+        setError(null);
 
         if (!filteredReport || filteredReport.length === 0) {
             setError('Não há dados filtrados para exportar.');
             return;
         }
 
-        // --- Início da Lógica de Geração de CSV no Frontend ---
 
-        // 1. Definir Cabeçalhos (com acentos)
         const headers = [
             'Empresa',
             'Total de Acessos',
@@ -165,29 +153,23 @@ const AdminBillingReport = () => {
             'Status da Fatura'
         ];
 
-        // 2. Mapear os dados filtrados para linhas do CSV
         const rows = filteredReport.map(item => [
-            `"${item.company_name.replace(/"/g, '""')}"`, // Trata aspas dentro do nome
+            `"${item.company_name.replace(/"/g, '""')}"`,
             item.total_accesses,
-            // Formatar número para padrão CSV (ponto como decimal, sem R$)
-            parseFloat(item.total_cost || 0).toFixed(2).replace('.', ','), // Troca ponto por vírgula para Excel PT-BR
+            parseFloat(item.total_cost || 0).toFixed(2).replace('.', ','),
             item.billing_status === 'sent' ? 'Faturado' : 'Pendente'
         ]);
 
-        // 3. Montar o conteúdo CSV (Cabeçalhos + Linhas)
-        // Adiciona o BOM (Byte Order Mark) para UTF-8, melhorando compatibilidade com Excel
         let csvContent = '\uFEFF';
-        csvContent += headers.join(';') + '\n'; // Usar ponto e vírgula como separador
+        csvContent += headers.join(';') + '\n';
         rows.forEach(row => {
             csvContent += row.join(';') + '\n';
         });
 
-        // 4. Criar Blob e Link para Download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        if (link.download !== undefined) { // Checa se o browser suporta download
+        if (link.download !== undefined) {
             const url = URL.createObjectURL(blob);
-            // Nome do arquivo dinâmico com filtros
             const companyName = selectedCompany === 'all' ? 'todas' : companies.find(c => c.id === parseInt(selectedCompany))?.name || 'desconhecida';
             const fileName = `relatorio-faturamento-${selectedDate.year}-${String(selectedDate.month).padStart(2, '0')}-${companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv`;
 
@@ -197,28 +179,24 @@ const AdminBillingReport = () => {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(url); // Libera memória
+            URL.revokeObjectURL(url);
         } else {
              setError('Seu navegador não suporta a função de download direto.');
         }
-        // --- Fim da Lógica de Geração de CSV no Frontend ---
     };
 
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
-    const monthOptions = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1}`.padStart(2, '0') })); // Meses 01-12
+    const monthOptions = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1}`.padStart(2, '0') }));
 
-    // Filtra o relatório localmente APÓS buscar todos os dados
     const filteredReport = report.filter(item =>
         selectedCompany === 'all' || item.company_id === parseInt(selectedCompany)
     );
 
-    // Calcula totais apenas do relatório filtrado
     const totalAccessesFiltered = filteredReport.reduce((sum, item) => sum + item.total_accesses, 0);
     const totalCostFiltered = filteredReport.reduce((sum, item) => sum + parseFloat(item.total_cost || 0), 0);
 
     return (
         <>
-            {/* Título da Página */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 <ReceiptLongIcon sx={{ color: 'primary.main', fontSize: '2.5rem' }} />
                 <Typography variant="h5">Extrato Mensal para Faturamento</Typography>
@@ -227,12 +205,9 @@ const AdminBillingReport = () => {
                 Visualize os custos consolidados por empresa e gerencie o status do faturamento.
             </Typography>
 
-            {/* Alerta de Erro */}
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            {/* Card Principal */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: '12px' }}>
-                {/* Filtros e Botão de Download */}
                 <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', flexWrap: 'wrap' }}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                         <InputLabel>Mês</InputLabel>
@@ -263,14 +238,13 @@ const AdminBillingReport = () => {
                         variant="outlined"
                         onClick={handleDownload}
                         startIcon={<DownloadIcon />}
-                        disabled={loading || filteredReport.length === 0} // Desabilita se carregando ou sem dados filtrados
-                        sx={{ height: '40px' }} // Alinha altura com os Selects
+                        disabled={loading || filteredReport.length === 0}
+                        sx={{ height: '40px' }}
                     >
                         Exportar CSV
                     </Button>
                 </Box>
 
-                {/* Tabela de Dados */}
                 <TableContainer>
                     <Table sx={{ '& .MuiTableCell-root': { borderBottom: 'none' } }}>
                         <TableHead>
@@ -298,7 +272,7 @@ const AdminBillingReport = () => {
                                             <Tooltip title={item.billing_status === 'sent' ? 'Marcar como Pendente' : 'Marcar como Faturado'}>
                                                 {/* IconButton chama a função para abrir o diálogo */}
                                                 <IconButton onClick={() => openConfirmationDialog(item.company_id, item.billing_status)}
-                                                    color={item.billing_status === 'sent' ? 'warning' : 'success'} // Cor muda com o estado
+                                                    color={item.billing_status === 'sent' ? 'warning' : 'success'}
                                                 >
                                                     {item.billing_status === 'sent' ? <MarkChatUnreadIcon /> : <MarkChatReadIcon />}
                                                 </IconButton>
