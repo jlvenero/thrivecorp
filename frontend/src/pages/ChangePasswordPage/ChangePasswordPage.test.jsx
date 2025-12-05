@@ -64,4 +64,33 @@ describe('ChangePasswordPage', () => {
       expect.anything()
     );
   });
+
+  it('deve mostrar erro se a senha for muito curta (< 3 caracteres)', async () => {
+    renderComponent();
+    
+    fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: '123' } });
+    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: '12' } });
+    fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: '12' } });
+    
+    fireEvent.click(screen.getByRole('button', { name: 'Alterar Senha' }));
+
+    expect(await screen.findByText(/A nova senha deve ter pelo menos 3 caracteres/i)).toBeInTheDocument();
+  });
+
+  it('deve lidar com erro da API (ex: senha antiga incorreta)', async () => {
+    const errorMessage = 'A senha antiga está incorreta.';
+    axios.put.mockRejectedValue({ 
+        response: { data: { error: errorMessage } } 
+    });
+
+    renderComponent();
+
+    fireEvent.change(screen.getByLabelText(/Senha Atual/i), { target: { value: 'errada' } });
+    fireEvent.change(screen.getByLabelText(/^Nova Senha/i), { target: { value: 'nova123' } });
+    fireEvent.change(screen.getByLabelText(/Confirme a Nova Senha/i), { target: { value: 'nova123' } });
+    
+    fireEvent.click(screen.getByRole('button', { name: 'Alterar Senha' }));
+
+    expect(await screen.findByText(errorMessage)).toBeInTheDocument();
+  });
 });
